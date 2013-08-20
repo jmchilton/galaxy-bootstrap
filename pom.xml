@@ -13,9 +13,9 @@
     <version>7</version>
   </parent>
   <scm>
-    <connection>scm:git:git@github.com:jmchilton/galaxy_bootstrap.git</connection>
-    <developerConnection>scm:git:git@github.com:jmchilton/galaxy_bootstrap.git</developerConnection>
-    <url>git@github.com:jmchilton/galaxy_bootstrap.git</url>
+    <connection>scm:git:git@github.com:jmchilton/galaxy-bootstrap.git</connection>
+    <developerConnection>scm:git:git@github.com:jmchilton/galaxy-bootstrap.git</developerConnection>
+    <url>git@github.com:jmchilton/galaxy-bootstrap.git</url>
   </scm>
   <properties>
     <skipTests>false</skipTests>
