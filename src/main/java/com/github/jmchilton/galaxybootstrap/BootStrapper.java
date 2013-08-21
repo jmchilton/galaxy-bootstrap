@@ -1,8 +1,11 @@
 package com.github.jmchilton.galaxybootstrap;
 
+import com.google.common.hash.Hashing;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BootStrapper {
   private final DownloadProperties downloadProperties;
@@ -14,22 +17,107 @@ public class BootStrapper {
   public String getPath() {
     return downloadProperties.location.getAbsolutePath();
   }
+  
+  public File getRoot() {
+    return new File(getPath());
+  }
+  
+  public GalaxyDaemon runWithProperties(final GalaxyProperties galaxyProperties) {
+    galaxyProperties.configureGalaxy(getRoot());
+    executeGalaxyScript("python scripts/fetch_eggs.py");
+    executeGalaxyScript("sh create_db.sh > /dev/null");
+    final Process process = execute("sh", new File(getPath(), "run.sh").getAbsolutePath(), "--daemon");
+    return new GalaxyDaemon(galaxyProperties, getRoot());
+  }
 
+  public class GalaxyDaemon {
+    private final GalaxyProperties galaxyProperties;
+    private final File galaxyRoot;
+    
+    GalaxyDaemon(final GalaxyProperties galaxyProperties,
+                 final File galaxyRoot) {
+      this.galaxyProperties = galaxyProperties;
+      this.galaxyRoot = galaxyRoot;
+    }
+    
+    public void stop() {
+      final Process process = execute("sh", new File(galaxyRoot, "run.sh").getAbsolutePath(), "--stop-daemon");
+      try {
+        process.waitFor();
+      } catch(InterruptedException ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    
+    public boolean up() {
+      return !IoUtils.available(galaxyProperties.getPort());
+    }
+    
+    public boolean waitForUp() {
+      return wait(true);
+    }
+    
+    public boolean waitForDown() {
+      return wait(false);
+    }
+    
+    private boolean wait(final boolean up) {
+      boolean correctState = false;
+      for(int i = 0; i < 600; i++) {
+        correctState = up() == up;
+        if(correctState) {
+          break;
+        }
+        try {
+          Thread.sleep(1000L);
+        } catch(InterruptedException ex) {
+          throw new RuntimeException(ex);
+        }
+      }
+      return correctState;
+    }
+
+  }
+  
+  
   public void setupGalaxy() {
     final String repositoryUrl = downloadProperties.repositoryUrl;
     final String path = getPath();
-    execute("hg", "clone", repositoryUrl, path);
-    final File confDirectory = new File(path, "conf.d");
-    confDirectory.mkdir();
-    final File defaults = new File(path, "universe_wsgi.ini.sample");
-    
+    String repositoryTarget = repositoryUrl;
+    if(downloadProperties.cache) {
+      final String repoHash = Hashing.md5().hashString(repositoryUrl).toString();
+      final File cache = new File(Config.home(), repoHash);
+      if(!cache.exists()) {
+        cache.getParentFile().mkdirs();
+        executeAndWait("hg", "clone", repositoryUrl, cache.getAbsolutePath());
+      }
+      executeAndWait("hg", "-R", cache.getAbsolutePath(), "pull", "-u");
+      repositoryTarget = cache.getAbsolutePath();
+    }
+    executeAndWait("hg", "clone", repositoryTarget, path);
   }
   
-  public void execute(final String... commands) {
-    execute(commands, null);
+  private void executeAndWait(final String... commands) {
+    executeAndWait(commands, null);
+  }
+  
+  private Process execute(final String... commands) {
+    final ProcessBuilder builder = new ProcessBuilder(commands);
+    final Process process;
+    try {
+      process = builder.start();
+    } catch(IOException ex) { 
+      throw new RuntimeException(ex);
+    }
+    return process;
+  }
+  
+  private void executeGalaxyScript(final String scriptName) {
+    final String bashScript = String.format("cd %s; %s", getPath(), scriptName);
+    executeAndWait("bash", "-c", bashScript);
   }
 
-  public void execute(final String[] commands, final Map<String, String> properties) {
+  private void executeAndWait(final String[] commands, final Map<String, String> properties) {
     try {
       final ProcessBuilder builder = new ProcessBuilder(commands);
       if(properties != null) {
@@ -48,12 +136,13 @@ public class BootStrapper {
     }
   }
 
-  public static class DownloadProperties {
+  static class DownloadProperties {
     private final String repositoryUrl;
     private final File location;
     private static final String DEFAULT_REPOSITORY_URL =
                                 "https://bitbucket.org/galaxy/galaxy-dist";
-
+    private boolean cache = true;
+    
     public DownloadProperties(final String repositoryUrl,
                               final File location_) {
       this.repositoryUrl = repositoryUrl;
@@ -78,4 +167,6 @@ public class BootStrapper {
       this(DEFAULT_REPOSITORY_URL);
     }
   }
+  
+  
 }
