@@ -3,9 +3,9 @@ package com.github.jmchilton.galaxybootstrap;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 class IoUtils {
-  
   
   /**
    * Returns a free port number on localhost.
@@ -62,4 +62,39 @@ class IoUtils {
       }
     }
   }
+
+  static void executeAndWait(final String[] commands, final Map<String, String> properties) {
+    try {
+      final ProcessBuilder builder = new ProcessBuilder(commands);
+      if(properties != null) {
+        builder.environment().putAll(properties);
+      }
+      final Process p = builder.start();
+      final int returnCode = p.waitFor();
+      if(returnCode != 0) {
+        final String message = "Execution of command [%s] failed.";
+        throw new RuntimeException(String.format(message, commands[0]));
+      }
+    } catch(IOException ex) {
+      throw new RuntimeException(ex);
+    } catch(InterruptedException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  static void executeAndWait(final String... commands) {
+    executeAndWait(commands, null);
+  }
+  
+  static Process execute(final String... commands) {
+    final ProcessBuilder builder = new ProcessBuilder(commands);
+    final Process process;
+    try {
+      process = builder.start();
+    } catch(IOException ex) { 
+      throw new RuntimeException(ex);
+    }
+    return process;
+  }
+  
 }

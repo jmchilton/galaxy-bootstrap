@@ -1,6 +1,6 @@
 package com.github.jmchilton.galaxybootstrap;
 
-import com.github.jmchilton.galaxybootstrap.BootStrapper.DownloadProperties;
+import com.github.jmchilton.galaxybootstrap.DownloadProperties;
 import com.github.jmchilton.galaxybootstrap.BootStrapper.GalaxyDaemon;
 import org.testng.annotations.Test;
 
