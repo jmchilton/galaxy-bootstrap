@@ -1,7 +1,7 @@
 #!/bin/bash
 
 read -s -p "GPG Password: " gpgpass
-mvn_args = "-Dgpg.passphrase=$gpgpass -DskipTests=true -DperformRelease=true"
+mvn_args="-Dgpg.passphrase=$gpgpass -DskipTests=true -DperformRelease=true"
 
 mvn $mvn_args release:clean
 
