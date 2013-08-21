@@ -18,10 +18,19 @@ public class BootStrapper {
     return new File(getPath());
   }
   
-  public GalaxyDaemon runWithProperties(final GalaxyProperties galaxyProperties) {
+  public GalaxyDaemon run(final GalaxyProperties galaxyProperties) {
+    return run(galaxyProperties, null);
+  }
+  
+  public GalaxyDaemon run(final GalaxyProperties galaxyProperties,
+                          final GalaxyData galaxyData) {
     galaxyProperties.configureGalaxy(getRoot());
     executeGalaxyScript("python scripts/fetch_eggs.py");
     executeGalaxyScript("sh create_db.sh > /dev/null");
+    if(galaxyData != null) {
+      galaxyData.writeSeedScript(new File(getRoot(), "seed.py"));
+      executeGalaxyScript("python seed.py");
+    }
     final Process process = IoUtils.execute("sh", new File(getPath(), "run.sh").getAbsolutePath(), "--daemon");
     return new GalaxyDaemon(galaxyProperties, getRoot());
   }

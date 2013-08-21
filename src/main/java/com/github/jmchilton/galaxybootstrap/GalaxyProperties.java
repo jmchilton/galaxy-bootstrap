@@ -1,6 +1,8 @@
 
 package com.github.jmchilton.galaxybootstrap;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.FileReader;
@@ -32,6 +34,15 @@ public class GalaxyProperties {
     port = IoUtils.findFreePort();
     serverProperties.put("port", Integer.toString(port));
     return this;
+  }
+  
+  public void setAdminUser(final String username) {
+    setAdminUsers(Lists.newArrayList(username));
+  }
+  
+  public void setAdminUsers(final Iterable<String> usernames) {
+    final String usernamesStr = Joiner.on(",").join(usernames);
+    setAppProperty("admin_users", usernamesStr);
   }
 
   public void configureGalaxy(final File galaxyRoot) {
