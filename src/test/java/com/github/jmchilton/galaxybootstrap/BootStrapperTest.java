@@ -1,6 +1,5 @@
 package com.github.jmchilton.galaxybootstrap;
 
-import com.github.jmchilton.galaxybootstrap.DownloadProperties;
 import com.github.jmchilton.galaxybootstrap.BootStrapper.GalaxyDaemon;
 import com.github.jmchilton.galaxybootstrap.GalaxyData.User;
 import org.testng.annotations.Test;
@@ -9,7 +8,7 @@ public class BootStrapperTest {
 
   @Test
   public void testSetup() throws InterruptedException {
-    final BootStrapper bootStrapper = new BootStrapper(new DownloadProperties());
+    final BootStrapper bootStrapper = new BootStrapper();
     bootStrapper.setupGalaxy();
     final GalaxyProperties galaxyProperties = new GalaxyProperties().assignFreePort();
     final GalaxyData galaxyData = new GalaxyData();
@@ -24,6 +23,7 @@ public class BootStrapperTest {
     assert daemon.waitForUp();
     daemon.stop();
     assert daemon.waitForDown();
+    
   }
   
 }

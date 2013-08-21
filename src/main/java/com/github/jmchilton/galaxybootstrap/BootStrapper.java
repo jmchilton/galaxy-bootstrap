@@ -6,6 +6,10 @@ import java.io.File;
 public class BootStrapper {
   private final DownloadProperties downloadProperties;
 
+  public BootStrapper() {
+    this(new DownloadProperties());
+  }
+
   public BootStrapper(final DownloadProperties downloadProperties) {
     this.downloadProperties = downloadProperties;
   }
@@ -32,17 +36,28 @@ public class BootStrapper {
       executeGalaxyScript("python seed.py");
     }
     final Process process = IoUtils.execute("sh", new File(getPath(), "run.sh").getAbsolutePath(), "--daemon");
-    return new GalaxyDaemon(galaxyProperties, getRoot());
+    return new GalaxyDaemon(galaxyProperties, getRoot(), this);
+  }
+  
+  public void deleteGalaxyRoot() {
+    IoUtils.executeAndWait("/bin/rm", "-rf", getPath());
   }
 
   public static class GalaxyDaemon {
     private final GalaxyProperties galaxyProperties;
     private final File galaxyRoot;
+    private final BootStrapper bootStrapper;
     
     GalaxyDaemon(final GalaxyProperties galaxyProperties,
-                 final File galaxyRoot) {
+                 final File galaxyRoot,
+                 final BootStrapper bootStrapper) {
       this.galaxyProperties = galaxyProperties;
       this.galaxyRoot = galaxyRoot;
+      this.bootStrapper = bootStrapper;
+    }
+    
+    public BootStrapper getBootStrapper() {
+      return bootStrapper;
     }
     
     public void stop() {
