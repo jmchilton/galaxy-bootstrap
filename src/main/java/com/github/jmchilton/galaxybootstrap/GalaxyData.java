@@ -3,10 +3,9 @@ package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
-import com.google.common.io.ByteSource;
 import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
-import com.google.common.io.FileWriteMode;
+import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +62,7 @@ public class GalaxyData {
   
   public void writeSeedScript(final File scriptPath) {
     final CharSource script = Resources.asCharSource(getClass().getResource("seedScript"), Charsets.UTF_8);
-    final CharSink charSink = com.google.common.io.Files.asCharSink(scriptPath, Charsets.UTF_8);
+    final CharSink charSink = Files.asCharSink(scriptPath, Charsets.UTF_8);
     try {
       final StringBuilder scriptBuilder = new StringBuilder();
       scriptBuilder.append(script.read());
