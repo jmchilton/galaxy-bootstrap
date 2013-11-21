@@ -2,6 +2,8 @@ package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.hash.Hashing;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BootStrapper {
   private final DownloadProperties downloadProperties;
@@ -114,7 +116,16 @@ public class BootStrapper {
       IoUtils.executeAndWait("hg", "-R", cache.getAbsolutePath(), "pull", "-u");
       repositoryTarget = cache.getAbsolutePath();
     }
-    IoUtils.executeAndWait("hg", "clone", repositoryTarget, path);
+    final List<String> cloneCommand = new ArrayList<String>();
+    cloneCommand.add("hg");
+    cloneCommand.add("clone");
+    if(downloadProperties.branch != null) {
+      cloneCommand.add("-b");
+      cloneCommand.add(downloadProperties.branch);
+    }
+    cloneCommand.add(repositoryTarget);
+    cloneCommand.add(path);
+    IoUtils.executeAndWait(cloneCommand.toArray(new String[0]));
   }
   
   private void executeGalaxyScript(final String scriptName) {
