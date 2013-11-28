@@ -1,16 +1,24 @@
 package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.hash.Hashing;
+import com.google.common.io.Resources;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /** 
  * Defines basic properties used for obtaining Galaxy instance.
  *  
  */
 public class DownloadProperties {
+  public static final String GITHUB_MASTER_URL = "https://codeload.github.com/jmchilton/galaxy-central/zip/master";
   public static final String GALAXY_DIST_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-dist";
   public static final String GALAXY_CENTRAL_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-central";
   public static final String BRANCH_STABLE = "stable";
@@ -53,6 +61,10 @@ public class DownloadProperties {
 
   public void setUseCache(final boolean cache) {
     this.cache = cache;
+  }
+  
+  public static DownloadProperties wgetGithubCentral() {
+    return new DownloadProperties(new GithubDownloader(), null);
   }
   
   public static DownloadProperties forGalaxyDist() {
@@ -112,12 +124,66 @@ public class DownloadProperties {
     }
 
   }
-
+  
   private static class GithubDownloader implements Downloader {
 
+    public void downlaodTo(File path, boolean useCache) {
+      try {
+        final File downloadDest = File.createTempFile("gxdownload", ".zip");
+        final File unzipDest = File.createTempFile("gxdownload", "dir");
+        final String unzippedDirectory = String.format("%s/galaxy-central-master", unzipDest.getAbsolutePath());
+        IoUtils.executeAndWait("wget", GITHUB_MASTER_URL, "-O", downloadDest.getAbsolutePath());
+        unzipDest.delete();
+        IoUtils.executeAndWait("unzip", "-o", "-qq", downloadDest.getAbsolutePath(), "-d", unzipDest.getAbsolutePath());
+        path.delete();
+        IoUtils.executeAndWait("mv", unzippedDirectory, path.getAbsolutePath());
+        IoUtils.executeAndWait("rm", "-rf", unzipDest.getAbsolutePath(), downloadDest.getAbsolutePath());
+      } catch(IOException ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    
+  }
+
+  private static class JavaGithubDownloader implements Downloader {
+    // WAY TO SLOW.
     @Override
     public void downlaodTo(final File path, final boolean useCache) {
-      throw new UnsupportedOperationException("Not supported yet.");
+
+      try {
+        final URL download = new URL(GITHUB_MASTER_URL);
+        ZipInputStream zis = new ZipInputStream(download.openStream());
+        ZipEntry ze = zis.getNextEntry();
+        byte[] buffer = new byte[1024];
+        while(ze!=null){
+ 
+    	   String fileName = ze.getName().substring("galaxy-central-master/".length());
+           if(fileName.equals("")) {
+             continue;
+           }
+           File newFile = new File(path + File.separator + fileName);
+ 
+            //create all non exists folders
+            //else you will hit FileNotFoundException for compressed folder
+            new File(newFile.getParent()).mkdirs();
+ 
+            FileOutputStream fos = new FileOutputStream(newFile);             
+ 
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+       		fos.write(buffer, 0, len);
+            }
+ 
+            fos.close();   
+            ze = zis.getNextEntry();
+    	}
+ 
+        zis.closeEntry();
+    	zis.close();
+ 
+      } catch(IOException ex) {
+        throw new RuntimeException(ex);
+      }
     }
 
   }  
