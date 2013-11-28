@@ -27,6 +27,7 @@ public class BootStrapperTest {
     galaxyData.getUsers().add(normalUser);
     galaxyProperties.setAdminUser("admin@localhost");
     galaxyProperties.setAppProperty("allow_library_path_paste", "true");
+    galaxyProperties.prepopulateSqliteDatabase();
     final int port = galaxyProperties.getPort();
     assert IoUtils.available(port);
     final GalaxyDaemon daemon = bootStrapper.run(galaxyProperties, galaxyData);

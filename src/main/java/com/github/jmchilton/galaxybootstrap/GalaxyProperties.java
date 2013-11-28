@@ -2,6 +2,7 @@
 package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 import org.ini4j.Ini;
 import org.ini4j.Profile.Section;
@@ -24,6 +26,7 @@ public class GalaxyProperties {
   private final Map<String, String> serverProperties = Maps.newHashMap();
   private int port = 8080;  // default
   private boolean configureNestedShedTools = false;
+  private Optional<URL> database = Optional.absent();
   
   public GalaxyProperties setAppProperty(final String name, final String value) {
     appProperties.put(name, value);
@@ -32,6 +35,18 @@ public class GalaxyProperties {
 
   public GalaxyProperties setServerProperty(final String name, final String value) {
     serverProperties.put(name, value);
+    return this;
+  }
+  
+  public GalaxyProperties prepopulateSqliteDatabase() {
+    return prepopulateSqliteDatabase(Resources.getResource(GalaxyProperties.class, "universe.sqlite"));
+  }
+  
+  public GalaxyProperties prepopulateSqliteDatabase(final URL database) {
+    this.database = Optional.of(database);
+    // Set database auto migrate to true so database
+    // is upgraded from revision in jar if needed.
+    setAppProperty("database_auto_migrate", "true");
     return this;
   }
   
@@ -82,6 +97,13 @@ public class GalaxyProperties {
       dumpMapToSection(serverSection, serverProperties);
       final File configIni = new File(galaxyRoot, "universe_wsgi.ini");
       ini.store(configIni);
+      
+      final File databaseDirectory = new File(galaxyRoot, "database");
+      final File sqliteDatabase = new File(databaseDirectory, "universe.sqlite");
+      if(this.database.isPresent()) {
+        final URL database = this.database.get();
+        Files.copy(Resources.newInputStreamSupplier(database), sqliteDatabase);
+      }
     } catch(final IOException ioException) {
       throw new RuntimeException(ioException);
     }
