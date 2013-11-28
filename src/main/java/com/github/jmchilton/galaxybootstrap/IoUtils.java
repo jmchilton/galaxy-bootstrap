@@ -1,5 +1,6 @@
 package com.github.jmchilton.galaxybootstrap;
 
+import com.google.common.base.Joiner;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -73,7 +74,7 @@ class IoUtils {
       final int returnCode = p.waitFor();
       if(returnCode != 0) {
         final String message = "Execution of command [%s] failed.";
-        throw new RuntimeException(String.format(message, commands[0]));
+        throw new RuntimeException(String.format(message, Joiner.on(" ").join(commands)));
       }
     } catch(IOException ex) {
       throw new RuntimeException(ex);
