@@ -1,15 +1,12 @@
 package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.hash.Hashing;
-import com.google.common.io.Resources;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -43,18 +40,22 @@ public class DownloadProperties {
     this.location = location;    
   }
   
+  @Deprecated
   public DownloadProperties(final String repositoryUrl, final File location) {
     this(repositoryUrl, BRANCH_STABLE, location);
   }
   
+  @Deprecated
   public DownloadProperties(final String repositoryUrl, final String branch, final File location) {
     this(new HgDownloader(repositoryUrl, branch), location);
   }
 
+  @Deprecated
   public DownloadProperties(final String repositoryUrl) {
     this(repositoryUrl, null);
   }
 
+  @Deprecated
   public DownloadProperties() {
     this(DEFAULT_REPOSITORY_URL);
   }
@@ -64,17 +65,37 @@ public class DownloadProperties {
   }
   
   public static DownloadProperties wgetGithubCentral() {
-    return new DownloadProperties(new GithubDownloader(), null);
+    return wgetGithubCentral(null);
   }
   
   public static DownloadProperties forGalaxyDist() {
-    return new DownloadProperties();
+    return forGalaxyDist(null);
   }
   
   public static DownloadProperties forGalaxyCentral() {
-    return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_DEFAULT, null);
+    return forGalaxyCentral(null);
+  }
+  
+  public static DownloadProperties forLatestStable() {
+    return forLatestStable(null);   
   }
 
+  public static DownloadProperties wgetGithubCentral(final File destination) {
+    return new DownloadProperties(new GithubDownloader(), destination);
+  }
+  
+  public static DownloadProperties forGalaxyDist(final File destination) {
+    return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, destination);
+  }
+  
+  public static DownloadProperties forGalaxyCentral(final File destination) {
+    return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, destination);
+  }
+  
+  public static DownloadProperties forLatestStable(final File destination) {
+    return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_STABLE, destination);
+  }
+  
   void download() {
     final String path = location.getAbsolutePath();
     this.downloader.downlaodTo(location, cache);
