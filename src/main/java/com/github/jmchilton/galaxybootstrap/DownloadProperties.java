@@ -1,7 +1,10 @@
 package com.github.jmchilton.galaxybootstrap;
 
+import com.google.common.hash.Hashing;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /** 
  * Defines basic properties used for obtaining Galaxy instance.
@@ -58,4 +61,29 @@ public class DownloadProperties {
     return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_DEFAULT, null);
   }  
 
+  void download() {
+    final String path = location.getAbsolutePath();
+    String repositoryTarget = repositoryUrl;
+    if(cache) {
+      final String repoHash = Hashing.md5().hashString(repositoryUrl).toString();
+      final File cache = new File(Config.home(), repoHash);
+      if(!cache.exists()) {
+        cache.getParentFile().mkdirs();
+        IoUtils.executeAndWait("hg", "clone", repositoryUrl, cache.getAbsolutePath());
+      }
+      IoUtils.executeAndWait("hg", "-R", cache.getAbsolutePath(), "pull", "-u");
+      repositoryTarget = cache.getAbsolutePath();
+    }
+    final List<String> cloneCommand = new ArrayList<String>();
+    cloneCommand.add("hg");
+    cloneCommand.add("clone");
+    if(branch != null) {
+      cloneCommand.add("-b");
+      cloneCommand.add(branch);
+    }
+    cloneCommand.add(repositoryTarget);
+    cloneCommand.add(path);
+    IoUtils.executeAndWait(cloneCommand.toArray(new String[0]));
+  }
+  
 }

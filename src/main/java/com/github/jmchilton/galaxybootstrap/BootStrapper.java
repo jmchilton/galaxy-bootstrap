@@ -103,29 +103,7 @@ public class BootStrapper {
   
   
   public void setupGalaxy() {
-    final String repositoryUrl = downloadProperties.repositoryUrl;
-    final String path = getPath();
-    String repositoryTarget = repositoryUrl;
-    if(downloadProperties.cache) {
-      final String repoHash = Hashing.md5().hashString(repositoryUrl).toString();
-      final File cache = new File(Config.home(), repoHash);
-      if(!cache.exists()) {
-        cache.getParentFile().mkdirs();
-        IoUtils.executeAndWait("hg", "clone", repositoryUrl, cache.getAbsolutePath());
-      }
-      IoUtils.executeAndWait("hg", "-R", cache.getAbsolutePath(), "pull", "-u");
-      repositoryTarget = cache.getAbsolutePath();
-    }
-    final List<String> cloneCommand = new ArrayList<String>();
-    cloneCommand.add("hg");
-    cloneCommand.add("clone");
-    if(downloadProperties.branch != null) {
-      cloneCommand.add("-b");
-      cloneCommand.add(downloadProperties.branch);
-    }
-    cloneCommand.add(repositoryTarget);
-    cloneCommand.add(path);
-    IoUtils.executeAndWait(cloneCommand.toArray(new String[0]));
+    downloadProperties.download();
   }
   
   private void executeGalaxyScript(final String scriptName) {
