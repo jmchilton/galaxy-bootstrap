@@ -71,6 +71,12 @@ public class GalaxyProperties {
       if(!toolsConfigured && configureNestedShedTools) {
         appProperties.put("tool_config_file", "tool_conf.xml,shed_tool_conf.xml");
       }
+      // Hack to work around following bug: https://trello.com/c/nKxmP6Vc
+      // Without this, galaxy will not startup because of problems
+      // with tool migration framework.
+      if(!appProperties.containsKey("running_functional_tests")) {
+        appProperties.put("running_functional_tests", "true");
+      }              
       dumpMapToSection(appSection, appProperties);
       final Section serverSection = ini.get("server:main");
       dumpMapToSection(serverSection, serverProperties);
