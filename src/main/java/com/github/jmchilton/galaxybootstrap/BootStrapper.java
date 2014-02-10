@@ -7,6 +7,7 @@ import java.util.List;
 
 public class BootStrapper {
   private final DownloadProperties downloadProperties;
+  private final String galaxyLogDirName = "bootstrap-log";
 
   public BootStrapper() {
     this(new DownloadProperties());
@@ -28,14 +29,44 @@ public class BootStrapper {
     return run(galaxyProperties, null);
   }
   
+  /**
+   * Defines a directory to place all log files for Galaxy bootstrap.
+   * @return  A directory to place all log files for Galaxy bootstrap.
+   */
+  private File getBootstrapLogDir() {
+    return new File(downloadProperties.location.getPath(), galaxyLogDirName);
+  }
+  
+  /**
+   * Constructs a path of a file under the bootstrap log directory.
+   * @param bootstrapLogDir  The File defining the log directory.
+   * @param logFileName  The name of the log file.
+   * @return  The full path to the log file.
+   */
+  private String buildLogPath(File bootstrapLogDir, String logFileName) {
+    return new File(bootstrapLogDir, logFileName).getAbsolutePath();
+  }
+  
   public GalaxyDaemon run(final GalaxyProperties galaxyProperties,
                           final GalaxyData galaxyData) {
+    File bootstrapLogDir = getBootstrapLogDir();
+    if (!bootstrapLogDir.exists()) {
+      if (!bootstrapLogDir.mkdir()) {
+        throw new RuntimeException("Could not make log directory " + bootstrapLogDir);
+      }
+    }
+    
     galaxyProperties.configureGalaxy(getRoot());
-    executeGalaxyScript("python scripts/fetch_eggs.py");
-    executeGalaxyScript("sh create_db.sh > /dev/null");
+    executeGalaxyScript("python scripts/fetch_eggs.py 1> "
+      + buildLogPath(bootstrapLogDir,"fetch_eggs.log") + " 2>&1");
+    
+    executeGalaxyScript("sh create_db.sh 1> " 
+      + buildLogPath(bootstrapLogDir,"create_db.log") + " 2>&1");
+    
     if(galaxyData != null) {
       galaxyData.writeSeedScript(new File(getRoot(), "seed.py"));
-      executeGalaxyScript("python seed.py");
+      executeGalaxyScript("python seed.py 1> " 
+        + buildLogPath(bootstrapLogDir,"seed.log") + " 2>&1");
     }
     final Process process = IoUtils.execute("sh", new File(getPath(), "run.sh").getAbsolutePath(), "--daemon");
     return new GalaxyDaemon(galaxyProperties, getRoot(), this);
