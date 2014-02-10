@@ -123,7 +123,7 @@ public class DownloadProperties {
   
   void download() {
     final String path = location.getAbsolutePath();
-    this.downloader.downlaodTo(location, cache);
+    this.downloader.downloadTo(location, cache);
   }
 
   @Override
@@ -133,7 +133,7 @@ public class DownloadProperties {
 
   private interface Downloader {
 
-    void downlaodTo(File path, boolean useCache);
+    void downloadTo(File path, boolean useCache);
 
   }
 
@@ -159,7 +159,7 @@ public class DownloadProperties {
       }
 
 	@Override
-    public void downlaodTo(File path, boolean useCache) {
+    public void downloadTo(File path, boolean useCache) {
       String repositoryTarget = repositoryUrl;
       if(useCache) {
         final String repoHash = Hashing.md5().hashString(repositoryUrl).toString();
@@ -198,7 +198,7 @@ public class DownloadProperties {
   
   private static class GithubDownloader implements Downloader {
 
-    public void downlaodTo(File path, boolean useCache) {
+    public void downloadTo(File path, boolean useCache) {
       try {
         final File downloadDest = File.createTempFile("gxdownload", ".zip");
         final File unzipDest = File.createTempFile("gxdownload", "dir");
@@ -223,7 +223,7 @@ public class DownloadProperties {
   private static class JavaGithubDownloader implements Downloader {
     // WAY TO SLOW.
     @Override
-    public void downlaodTo(final File path, final boolean useCache) {
+    public void downloadTo(final File path, final boolean useCache) {
 
       try {
         final URL download = new URL(GITHUB_MASTER_URL);
