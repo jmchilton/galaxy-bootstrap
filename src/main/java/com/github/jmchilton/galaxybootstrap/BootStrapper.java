@@ -1,9 +1,6 @@
 package com.github.jmchilton.galaxybootstrap;
 
-import com.google.common.hash.Hashing;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BootStrapper {
   private final DownloadProperties downloadProperties;
@@ -33,7 +30,7 @@ public class BootStrapper {
    * Defines a directory to place all log files for Galaxy bootstrap.
    * @return  A directory to place all log files for Galaxy bootstrap.
    */
-  private File getBootstrapLogDir() {
+  public File getBootstrapLogDir() {
     return new File(downloadProperties.location.getPath(), galaxyLogDirName);
   }
   
