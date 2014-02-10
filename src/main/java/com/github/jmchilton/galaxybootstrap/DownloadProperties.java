@@ -15,6 +15,7 @@ import java.util.zip.ZipInputStream;
  *  
  */
 public class DownloadProperties {
+	
   public static final String GITHUB_MASTER_URL = "https://codeload.github.com/jmchilton/galaxy-central/zip/master";
   public static final String GALAXY_DIST_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-dist";
   public static final String GALAXY_CENTRAL_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-central";
@@ -47,12 +48,12 @@ public class DownloadProperties {
   
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final File location) {
-    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.CURRENT_REVISION), location);
+    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.LATEST_REVISION), location);
   }
   
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final String branch, final File location) {
-    this(new HgDownloader(repositoryUrl, branch, HgDownloader.CURRENT_REVISION), location);
+    this(new HgDownloader(repositoryUrl, branch, HgDownloader.LATEST_REVISION), location);
   }
   
   @Deprecated
@@ -64,7 +65,7 @@ public class DownloadProperties {
 
   @Deprecated
   public DownloadProperties(final String repositoryUrl) {
-    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.CURRENT_REVISION), null);
+    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.LATEST_REVISION), null);
   }
 
   @Deprecated
@@ -124,7 +125,11 @@ public class DownloadProperties {
     final String path = location.getAbsolutePath();
     this.downloader.downlaodTo(location, cache);
   }
-  
+
+  @Override
+  public String toString() {
+    return "Galaxy Download: " + downloader + ", location=" + location + ", use cache=" + cache;
+  }
 
   private interface Downloader {
 
@@ -133,7 +138,7 @@ public class DownloadProperties {
   }
 
   private static class HgDownloader implements Downloader {
-    private static final String CURRENT_REVISION = "";	  
+    private static final String LATEST_REVISION = "";	  
 
     private final String branch;
     private final String repositoryUrl;
@@ -152,8 +157,8 @@ public class DownloadProperties {
         this.repositoryUrl = repositoryUrl;
         this.revision = revision;
       }
-    
-    @Override
+
+	@Override
     public void downlaodTo(File path, boolean useCache) {
       String repositoryTarget = repositoryUrl;
       if(useCache) {
@@ -174,7 +179,7 @@ public class DownloadProperties {
         cloneCommand.add(branch);
       }
       
-      if (!CURRENT_REVISION.equals(revision)) {
+      if (!LATEST_REVISION.equals(revision)) {
         cloneCommand.add("-r");
         cloneCommand.add(revision);
       }
@@ -183,7 +188,12 @@ public class DownloadProperties {
       cloneCommand.add(path.getAbsolutePath());
       IoUtils.executeAndWait(cloneCommand.toArray(new String[0]));
     }
-
+	
+    @Override
+    public String toString() {
+      String revision = (LATEST_REVISION.equals(this.revision) ? "latest" : this.revision);
+      return "Mercurial [repositoryUrl=" + repositoryUrl + ", branch=" + branch + ", revision=" + revision + "]";
+    }
   }
   
   private static class GithubDownloader implements Downloader {
@@ -204,6 +214,10 @@ public class DownloadProperties {
       }
     }
     
+    @Override
+    public String toString() {
+      return "GithubDownloader [url=" + GITHUB_MASTER_URL + ", branch=master]";
+    }
   }
 
   private static class JavaGithubDownloader implements Downloader {
@@ -246,6 +260,10 @@ public class DownloadProperties {
         throw new RuntimeException(ex);
       }
     }
-
+    
+    @Override
+    public String toString() {
+      return "JavaGithubDownloader [url=" + GITHUB_MASTER_URL + ", branch=master]";
+    }
   }  
 }
