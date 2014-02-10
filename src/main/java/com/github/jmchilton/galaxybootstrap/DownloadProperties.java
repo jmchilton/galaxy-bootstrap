@@ -25,6 +25,11 @@ public class DownloadProperties {
   final File location;
   boolean cache = true;
 
+  /**
+   * Builds a new DownloadProperties object defining how to download Galaxy.
+   * @param downloader The method to use for downloading Galaxy.
+   * @param location_  The location of the filesystem to store and setup Galaxy.
+   */
   DownloadProperties(final Downloader downloader, final File location_) {
     this.downloader = downloader;
     File location = location_;
@@ -42,17 +47,24 @@ public class DownloadProperties {
   
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final File location) {
-    this(repositoryUrl, BRANCH_STABLE, location);
+    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.CURRENT_REVISION), location);
   }
   
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final String branch, final File location) {
-    this(new HgDownloader(repositoryUrl, branch), location);
+    this(new HgDownloader(repositoryUrl, branch, HgDownloader.CURRENT_REVISION), location);
+  }
+  
+  @Deprecated
+  public DownloadProperties(final String repositoryUrl, final String branch, final String revision,
+    final File location) {
+	  
+    this(new HgDownloader(repositoryUrl, branch, revision), location);
   }
 
   @Deprecated
   public DownloadProperties(final String repositoryUrl) {
-    this(repositoryUrl, null);
+    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.CURRENT_REVISION), null);
   }
 
   @Deprecated
@@ -63,7 +75,7 @@ public class DownloadProperties {
   public void setUseCache(final boolean cache) {
     this.cache = cache;
   }
-  
+
   public static DownloadProperties wgetGithubCentral() {
     return wgetGithubCentral(null);
   }
@@ -88,12 +100,24 @@ public class DownloadProperties {
     return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, destination);
   }
   
+  public static DownloadProperties forGalaxyDist(final File destination, String revision) {
+    return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, revision, destination);
+  }
+  
   public static DownloadProperties forGalaxyCentral(final File destination) {
     return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, destination);
   }
   
+  public static DownloadProperties forGalaxyCentral(final File destination, String revision) {
+    return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, revision, destination);
+  }
+  
   public static DownloadProperties forLatestStable(final File destination) {
     return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_STABLE, destination);
+  }
+  
+  public static DownloadProperties forStableAtRevision(final File destination, String revision) {
+    return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_STABLE, revision, destination);
   }
   
   void download() {
@@ -109,15 +133,25 @@ public class DownloadProperties {
   }
 
   private static class HgDownloader implements Downloader {
+    private static final String CURRENT_REVISION = "";	  
+
     private final String branch;
     private final String repositoryUrl;
-
     
-    HgDownloader(final String repositoryUrl, final String branch) {
-      this.branch = branch;
-      this.repositoryUrl = repositoryUrl;
-    }
-
+    /**
+     * Revision to checkout, if null assumes we are interested in most recent. 
+     */
+    private final String revision;
+    
+    public HgDownloader(final String repositoryUrl, final String branch, final String revision) {
+        if (revision == null) {
+          throw new IllegalArgumentException("revision is null");
+        }
+    	
+        this.branch = branch;
+        this.repositoryUrl = repositoryUrl;
+        this.revision = revision;
+      }
     
     @Override
     public void downlaodTo(File path, boolean useCache) {
@@ -139,6 +173,12 @@ public class DownloadProperties {
         cloneCommand.add("-b");
         cloneCommand.add(branch);
       }
+      
+      if (!CURRENT_REVISION.equals(revision)) {
+        cloneCommand.add("-r");
+        cloneCommand.add(revision);
+      }
+      
       cloneCommand.add(repositoryTarget);
       cloneCommand.add(path.getAbsolutePath());
       IoUtils.executeAndWait(cloneCommand.toArray(new String[0]));
