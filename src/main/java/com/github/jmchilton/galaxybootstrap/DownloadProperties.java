@@ -20,6 +20,12 @@ public class DownloadProperties {
   public static final String GALAXY_CENTRAL_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-central";
   public static final String BRANCH_STABLE = "stable";
   public static final String BRANCH_DEFAULT = "default";
+  
+  /**
+   * Defines a constant for specifying that Galaxy should be downloaded with the latest revision.
+   */
+  public static final String LATEST_REVISION = "";
+
   private static final String DEFAULT_REPOSITORY_URL = GALAXY_DIST_REPOSITORY_URL;
   private final Downloader downloader;
   final File location;
@@ -52,7 +58,7 @@ public class DownloadProperties {
    */
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final File location) {
-    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.LATEST_REVISION), location);
+    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, LATEST_REVISION), location);
   }
   
   /**
@@ -63,7 +69,7 @@ public class DownloadProperties {
    */
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final String branch, final File location) {
-    this(new HgDownloader(repositoryUrl, branch, HgDownloader.LATEST_REVISION), location);
+    this(new HgDownloader(repositoryUrl, branch, LATEST_REVISION), location);
   }
   
   /**
@@ -87,7 +93,7 @@ public class DownloadProperties {
    */
   @Deprecated
   public DownloadProperties(final String repositoryUrl) {
-    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.LATEST_REVISION), null);
+    this(new HgDownloader(repositoryUrl, BRANCH_STABLE, LATEST_REVISION), null);
   }
 
   /**
@@ -236,8 +242,6 @@ public class DownloadProperties {
    *  Defines a downloader to download Galaxy from Mercurial. 
    */
   private static class HgDownloader implements Downloader {
-    private static final String LATEST_REVISION = "";	  
-
     private final String branch;
     private final String repositoryUrl;
     private final File cacheDir;
