@@ -15,9 +15,15 @@ import org.testng.annotations.Test;
 
 public class BootStrapperTest {
 
+  /**
+   * Tests deafult BootStrapper is the latest stable.
+   * @throws InterruptedException
+   * @throws IOException
+   */
   @Test
   public void testSetup() throws InterruptedException, IOException {
     final BootStrapper bootStrapper = new BootStrapper();
+    
     bootStrapper.setupGalaxy();
     
     // test to make sure we have checked out the latest revision of Galaxy
@@ -25,6 +31,60 @@ public class BootStrapperTest {
     String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
     assert expectedLatestRevision != null;
     assert expectedLatestRevision.equalsIgnoreCase(actualRevision);
+    
+    bootStrapper.deleteGalaxyRoot();
+  }
+  
+  /**
+   * Tests setup of Galaxy for the latest stable.
+   * @throws IOException 
+   * @throws InterruptedException 
+   */
+  @Test
+  public void testLatestStable() throws InterruptedException, IOException {
+    final BootStrapper bootStrapper = new BootStrapper(
+      DownloadProperties.forLatestStable());
+
+    testSetupGalaxyFor(bootStrapper);
+    
+    // test to make sure we have checked out the latest revision of Galaxy
+    String expectedLatestRevision = getTipMercurialRevisionHash(bootStrapper.getPath());
+    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
+    assert expectedLatestRevision != null;
+    assert expectedLatestRevision.equalsIgnoreCase(actualRevision);
+    
+    bootStrapper.deleteGalaxyRoot();
+  }
+  
+  /**
+   * Tests to make sure downloading Galaxy at a specific revision works
+   * @throws IOException 
+   * @throws InterruptedException 
+   */
+  @Test
+  public void testSpecificRevision() throws InterruptedException, IOException {
+    // Galaxy stable release for 2013.11.04 at https://bitbucket.org/galaxy/galaxy-dist
+    final String expectedRevision = "26f58e05aa1068761660681583821e21e6cbf7ab";
+    final BootStrapper bootStrapper = new BootStrapper(
+      DownloadProperties.forStableAtRevision(expectedRevision));
+    
+    testSetupGalaxyFor(bootStrapper);
+    
+    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
+    
+    assert expectedRevision.equalsIgnoreCase(actualRevision);
+    
+    bootStrapper.deleteGalaxyRoot();
+  }
+  
+  /**
+   * Tests Galaxy for a specific setup.
+   * @param bootStrapper  The BootStrapper used for setting up Galaxy.
+   * @throws InterruptedException
+   * @throws IOException
+   */
+  private void testSetupGalaxyFor(BootStrapper bootStrapper) throws InterruptedException, IOException {
+    bootStrapper.setupGalaxy();
     
     final GalaxyProperties galaxyProperties = 
       new GalaxyProperties()
@@ -49,45 +109,7 @@ public class BootStrapperTest {
     assert new File(bootStrapper.getRoot(), "shed_tools").isDirectory();
     assert daemon.waitForUp();
     daemon.stop();
-    assert daemon.waitForDown();
-    
-    bootStrapper.deleteGalaxyRoot();
-  }
-  
-  /**
-   * Tests to make sure DownloadProperties.forLatestStable() gets correct revision.
-   */
-  @Test
-  public void testLatestStable() {
-    final BootStrapper bootStrapper = new BootStrapper(
-      DownloadProperties.forLatestStable());
-    bootStrapper.setupGalaxy();
-    
-    // test to make sure we have checked out the latest revision of Galaxy
-    String expectedLatestRevision = getTipMercurialRevisionHash(bootStrapper.getPath());
-    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
-    assert expectedLatestRevision != null;
-    assert expectedLatestRevision.equalsIgnoreCase(actualRevision);
-    
-    bootStrapper.deleteGalaxyRoot();
-  }
-  
-  /**
-   * Tests to make sure downloading Galaxy at a specific revision works
-   */
-  @Test
-  public void testSpecificRevision() {
-    // arbitrary revision from stable branch at https://bitbucket.org/galaxy/galaxy-central
-    final String expectedRevision = "6c5913a4b701813e823638125fff8bf9fda7354b";
-    final BootStrapper bootStrapper = new BootStrapper(
-      DownloadProperties.forStableAtRevision(expectedRevision));
-    bootStrapper.setupGalaxy();
-    
-    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
-    
-    assert expectedRevision.equalsIgnoreCase(actualRevision);
-    
-    bootStrapper.deleteGalaxyRoot();
+    assert daemon.waitForDown();    
   }
   
   /**
