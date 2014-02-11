@@ -19,6 +19,13 @@ public class BootStrapperTest {
   public void testSetup() throws InterruptedException, IOException {
     final BootStrapper bootStrapper = new BootStrapper();
     bootStrapper.setupGalaxy();
+    
+    // test to make sure we have checked out the latest revision of Galaxy
+    String expectedLatestRevision = getTipMercurialRevisionHash(bootStrapper.getPath());
+    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
+    assert expectedLatestRevision != null;
+    assert expectedLatestRevision.equalsIgnoreCase(actualRevision);
+    
     final GalaxyProperties galaxyProperties = 
       new GalaxyProperties()
             .assignFreePort()
@@ -48,6 +55,24 @@ public class BootStrapperTest {
   }
   
   /**
+   * Tests to make sure DownloadProperties.forLatestStable() gets correct revision.
+   */
+  @Test
+  public void testLatestStable() {
+    final BootStrapper bootStrapper = new BootStrapper(
+      DownloadProperties.forLatestStable());
+    bootStrapper.setupGalaxy();
+    
+    // test to make sure we have checked out the latest revision of Galaxy
+    String expectedLatestRevision = getTipMercurialRevisionHash(bootStrapper.getPath());
+    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
+    assert expectedLatestRevision != null;
+    assert expectedLatestRevision.equalsIgnoreCase(actualRevision);
+    
+    bootStrapper.deleteGalaxyRoot();
+  }
+  
+  /**
    * Tests to make sure downloading Galaxy at a specific revision works
    */
   @Test
@@ -58,8 +83,7 @@ public class BootStrapperTest {
       DownloadProperties.forStableAtRevision(null, expectedRevision));
     bootStrapper.setupGalaxy();
     
-    String rootDir = bootStrapper.getRoot().getAbsolutePath();
-    String actualRevision = getCurrentMercurialRevisionHash(rootDir);
+    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
     
     assert expectedRevision.equalsIgnoreCase(actualRevision);
     
@@ -69,12 +93,28 @@ public class BootStrapperTest {
   /**
    * Given the mercurial root directory gets the current revision hash code checked out.
    * @param mercurialDir  The root mercurial directory.
-   * @return  The current revision hash check out.
+   * @return  The current revision hash checked out.
    */
   private String getCurrentMercurialRevisionHash(String mercurialDir) {
     String hash = null;
     final String bashScript 
       = "cd " + mercurialDir + "; hg parent --template '{node}'";
+    Process p = IoUtils.execute("bash", "-c", bashScript);
+    
+    hash = convertStreamToString(p.getInputStream());
+    
+    return hash;
+  }
+  
+  /**
+   * Given the mercurial root directory gets the tip revision hash code.
+   * @param mercurialDir  The root mercurial directory.
+   * @return  The tip revision hash.
+   */
+  private String getTipMercurialRevisionHash(String mercurialDir) {
+    String hash = null;
+    final String bashScript 
+      = "cd " + mercurialDir + "; hg tip --template '{node}'";
     Process p = IoUtils.execute("bash", "-c", bashScript);
     
     hash = convertStreamToString(p.getInputStream());
