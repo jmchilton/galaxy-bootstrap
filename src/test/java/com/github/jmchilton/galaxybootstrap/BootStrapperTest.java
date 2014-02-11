@@ -7,7 +7,10 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Scanner;
+
 import org.testng.annotations.Test;
 
 public class BootStrapperTest {
@@ -43,4 +46,50 @@ public class BootStrapperTest {
     
   }
   
+  /**
+   * Tests to make sure downloading Galaxy at a specific revision works
+   */
+  @Test
+  public void testSpecificRevision() {
+    // arbitrary revision from stable branch at https://bitbucket.org/galaxy/galaxy-central
+    final String expectedRevision = "6c5913a4b701813e823638125fff8bf9fda7354b";
+    final BootStrapper bootStrapper = new BootStrapper(
+      DownloadProperties.forStableAtRevision(null, expectedRevision));
+    bootStrapper.setupGalaxy();
+    
+    String rootDir = bootStrapper.getRoot().getAbsolutePath();
+    String actualRevision = getCurrentMercurialRevisionHash(rootDir);
+    
+    assert expectedRevision.equalsIgnoreCase(actualRevision);
+  }
+  
+  /**
+   * Given the mercurial root directory gets the current revision hash code checked out.
+   * @param mercurialDir  The root mercurial directory.
+   * @return  The current revision hash check out.
+   */
+  private String getCurrentMercurialRevisionHash(String mercurialDir) {
+    String hash = null;
+    final String bashScript 
+      = "cd " + mercurialDir + "; hg parent --template '{node}'";
+    Process p = IoUtils.execute("bash", "-c", bashScript);
+    
+    hash = convertStreamToString(p.getInputStream());
+    
+    return hash;
+  }
+  
+  /**
+   * Given an input stream, converts to a String containing all data.
+   * @param is  The input stream to read from.
+   * @return  A String containing all data from the input stream.
+   */
+  private String convertStreamToString(InputStream is) {
+    Scanner s = new Scanner(is);
+    Scanner d = s.useDelimiter("\\A");
+    String string = d.hasNext() ? d.next() : "";
+    s.close();
+    
+    return string;
+  }
 }
