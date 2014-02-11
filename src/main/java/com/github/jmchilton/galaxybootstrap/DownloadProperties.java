@@ -12,7 +12,6 @@ import java.util.zip.ZipInputStream;
 
 /** 
  * Defines basic properties used for obtaining Galaxy instance.
- *  
  */
 public class DownloadProperties {
 	
@@ -46,16 +45,34 @@ public class DownloadProperties {
     this.location = location;    
   }
   
+  /**
+   * Builds a new DownloadProperties on the stable branch with the given URL and location.
+   * @param repositoryUrl  The URL to the Galaxy repository to connect to.
+   * @param location  The location to store Galaxy, null if a directory should be chosen automatically.
+   */
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final File location) {
     this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.LATEST_REVISION), location);
   }
   
+  /**
+   * Builds a new DownloadProperties on the given branch with the given URL and location.
+   * @param repositoryUrl  The URL to the Galaxy repository to connect to.
+   * @param branch  The branch of the repository to use.
+   * @param location  The location to store Galaxy, null if a directory should be chosen automatically.
+   */
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final String branch, final File location) {
     this(new HgDownloader(repositoryUrl, branch, HgDownloader.LATEST_REVISION), location);
   }
   
+  /**
+   * Builds a new DownloadProperties on the given branch with the given URL and location.
+   * @param repositoryUrl  The URL to the Galaxy repository to connect to.
+   * @param branch  The branch of the repository to use.
+   * @param revision  The revision of Galaxy to use.
+   * @param location  The location to store Galaxy, null if a directory should be chosen automatically.
+   */
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final String branch, final String revision,
     final File location) {
@@ -63,64 +80,139 @@ public class DownloadProperties {
     this(new HgDownloader(repositoryUrl, branch, revision), location);
   }
 
+  /**
+   * Builds a new DownloadProperties on the stable branch with the given URL with an
+   *  automatically chosen local directory to store Galaxy.
+   * @param repositoryUrl  The URL to the Galaxy repository to connect to.
+   */
   @Deprecated
   public DownloadProperties(final String repositoryUrl) {
     this(new HgDownloader(repositoryUrl, BRANCH_STABLE, HgDownloader.LATEST_REVISION), null);
   }
 
+  /**
+   * Builds a new DownloadProperties with the default settings for downloading Galaxy.
+   */
   @Deprecated
   public DownloadProperties() {
     this(DEFAULT_REPOSITORY_URL);
   }
 
+  /**
+   * Whether or not a local cache of downloaded Galaxies should be created. 
+   * @param cache  True if a cache should be used, false otherwise.
+   */
   public void setUseCache(final boolean cache) {
     this.cache = cache;
   }
 
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from github using wget.
+   * @return  A DownloadProperties for downloading Galaxy from github using wget.
+   */
   public static DownloadProperties wgetGithubCentral() {
     return wgetGithubCentral(null);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from galaxy-dist.
+   * @return A new DownloadProperties for downloading Galaxy from galaxy-dist.
+   */
   public static DownloadProperties forGalaxyDist() {
     return forGalaxyDist(null);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from galaxy-central.
+   * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
+   */
   public static DownloadProperties forGalaxyCentral() {
     return forGalaxyCentral(null);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading the latest stable Galaxy.
+   * @return A new DownloadProperties for downloading the latest stable Galaxy.
+   */
   public static DownloadProperties forLatestStable() {
     return forLatestStable(null);   
   }
 
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from github using wget.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return  A DownloadProperties for downloading Galaxy from github using wget.
+   */
   public static DownloadProperties wgetGithubCentral(final File destination) {
     return new DownloadProperties(new GithubDownloader(), destination);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from galaxy-dist.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return A new DownloadProperties for downloading Galaxy from galaxy-dist.
+   */
   public static DownloadProperties forGalaxyDist(final File destination) {
     return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, destination);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from galaxy-dist.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @param revision The revision to use for Galaxy.
+   * @return A new DownloadProperties for downloading Galaxy from galaxy-dist.
+   */
   public static DownloadProperties forGalaxyDist(final File destination, String revision) {
     return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, revision, destination);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from galaxy-central.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
+   */
   public static DownloadProperties forGalaxyCentral(final File destination) {
     return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, destination);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from galaxy-central.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @param revision The revision to use for Galaxy.
+   * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
+   */
   public static DownloadProperties forGalaxyCentral(final File destination, String revision) {
     return new DownloadProperties(GALAXY_DIST_REPOSITORY_URL, BRANCH_STABLE, revision, destination);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading the latest stable Galaxy.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return A new DownloadProperties for downloading the latest stable Galaxy.
+   */
   public static DownloadProperties forLatestStable(final File destination) {
     return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_STABLE, destination);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy at the given revision.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return A new DownloadProperties for downloading Galaxy at the given revision.
+   */
   public static DownloadProperties forStableAtRevision(final File destination, String revision) {
     return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_STABLE, revision, destination);
   }
   
+  /**
+   * Performs the download of Galaxy.
+   */
   void download() {
     final String path = location.getAbsolutePath();
     this.downloader.downloadTo(location, cache);
@@ -131,12 +223,18 @@ public class DownloadProperties {
     return "Galaxy Download: " + downloader + ", location=" + location + ", use cache=" + cache;
   }
 
+  /**
+   * Defines an interface for implementations of classes to download Galaxy.
+   */
   private interface Downloader {
 
     void downloadTo(File path, boolean useCache);
 
   }
 
+  /**
+   *  Defines a downloader to download Galaxy from Mercurial. 
+   */
   private static class HgDownloader implements Downloader {
     private static final String LATEST_REVISION = "";	  
 
@@ -196,6 +294,9 @@ public class DownloadProperties {
     }
   }
   
+  /**
+   * Defines a downloader to download Galaxy from github.
+   */
   private static class GithubDownloader implements Downloader {
 
     public void downloadTo(File path, boolean useCache) {
@@ -220,6 +321,9 @@ public class DownloadProperties {
     }
   }
 
+  /**
+   * Defines a downloader to download Galaxy from github using Java.
+   */
   private static class JavaGithubDownloader implements Downloader {
     // WAY TO SLOW.
     @Override
