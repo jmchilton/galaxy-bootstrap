@@ -240,6 +240,7 @@ public class DownloadProperties {
 
     private final String branch;
     private final String repositoryUrl;
+    private final File cacheDir;
     
     /**
      * Revision to checkout, if null assumes we are interested in most recent. 
@@ -247,27 +248,39 @@ public class DownloadProperties {
     private final String revision;
     
     public HgDownloader(final String repositoryUrl, final String branch, final String revision) {
-        if (revision == null) {
-          throw new IllegalArgumentException("revision is null");
-        }
-    	
-        this.branch = branch;
-        this.repositoryUrl = repositoryUrl;
-        this.revision = revision;
+      if (revision == null) {
+        throw new IllegalArgumentException("revision is null");
       }
+    	
+      this.branch = branch;
+      this.repositoryUrl = repositoryUrl;
+      this.revision = revision;
+      
+      this.cacheDir = getCacheDir(repositoryUrl);
+    }
+    
+    /**
+     * Gets the directory of the Galaxy repository cache.
+     * @param repositoryUrl  The url used to constructe the cache directory.
+     * @return  The Galaxy repository cache.
+     */
+    private File getCacheDir(String repositoryUrl) {
+      final String repoHash = Hashing.md5().hashString(repositoryUrl).toString();
+      final File cache = new File(Config.home(), repoHash);
+      
+      return cache;
+    }
 
-	@Override
+	  @Override
     public void downloadTo(File path, boolean useCache) {
       String repositoryTarget = repositoryUrl;
       if(useCache) {
-        final String repoHash = Hashing.md5().hashString(repositoryUrl).toString();
-        final File cache = new File(Config.home(), repoHash);
-        if(!cache.exists()) {
-          cache.getParentFile().mkdirs();
-          IoUtils.executeAndWait("hg", "clone", repositoryUrl, cache.getAbsolutePath());
+        if(!cacheDir.exists()) {
+          cacheDir.getParentFile().mkdirs();
+          IoUtils.executeAndWait("hg", "clone", repositoryUrl, cacheDir.getAbsolutePath());
         }
-        IoUtils.executeAndWait("hg", "-R", cache.getAbsolutePath(), "pull", "-u");
-        repositoryTarget = cache.getAbsolutePath();
+        IoUtils.executeAndWait("hg", "-R", cacheDir.getAbsolutePath(), "pull", "-u");
+        repositoryTarget = cacheDir.getAbsolutePath();
       }
       final List<String> cloneCommand = new ArrayList<String>();
       cloneCommand.add("hg");
@@ -290,7 +303,8 @@ public class DownloadProperties {
     @Override
     public String toString() {
       String revision = (LATEST_REVISION.equals(this.revision) ? "latest" : this.revision);
-      return "Mercurial [repositoryUrl=" + repositoryUrl + ", branch=" + branch + ", revision=" + revision + "]";
+      return "Mercurial [repositoryUrl=" + repositoryUrl + ", branch=" 
+          + branch + ", revision=" + revision + ", cacheDir=" + cacheDir.getAbsolutePath() +"]";
     }
   }
   
