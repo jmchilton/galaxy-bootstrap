@@ -80,7 +80,7 @@ public class BootStrapperTest {
     // arbitrary revision from stable branch at https://bitbucket.org/galaxy/galaxy-central
     final String expectedRevision = "6c5913a4b701813e823638125fff8bf9fda7354b";
     final BootStrapper bootStrapper = new BootStrapper(
-      DownloadProperties.forStableAtRevision(null, expectedRevision));
+      DownloadProperties.forStableAtRevision(expectedRevision));
     bootStrapper.setupGalaxy();
     
     String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());

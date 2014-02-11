@@ -125,7 +125,16 @@ public class DownloadProperties {
    * @return A new DownloadProperties for downloading Galaxy from galaxy-dist.
    */
   public static DownloadProperties forGalaxyDist() {
-    return forGalaxyDist(null);
+    return forGalaxyDist(null, LATEST_REVISION);
+  }
+  
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from galaxy-dist with a specific revision.
+   * @param revision The revision to use for Galaxy.
+   * @return A new DownloadProperties for downloading Galaxy from galaxy-dist.
+   */
+  public static DownloadProperties forGalaxyDistAtRevision(String revision) {
+    return forGalaxyDist(null, revision);
   }
   
   /**
@@ -133,7 +142,16 @@ public class DownloadProperties {
    * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
    */
   public static DownloadProperties forGalaxyCentral() {
-    return forGalaxyCentral(null);
+    return forGalaxyCentral(null, LATEST_REVISION);
+  }
+  
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from galaxy-central with a specific revision.
+   * @param revision The revision to use for Galaxy.
+   * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
+   */
+  public static DownloadProperties forGalaxyCentralAtRevision(String revision) {
+    return forGalaxyCentral(null, revision);
   }
   
   /**
@@ -141,7 +159,16 @@ public class DownloadProperties {
    * @return A new DownloadProperties for downloading the latest stable Galaxy.
    */
   public static DownloadProperties forLatestStable() {
-    return forLatestStable(null);   
+    return forLatestStable(null);
+  }
+  
+  /**
+   * Builds a new DownloadProperties for downloading the latest stable Galaxy with a specific revision.
+   * @param revision The revision to use for Galaxy.
+   * @return A new DownloadProperties for downloading the latest stable Galaxy.
+   */
+  public static DownloadProperties forStableAtRevision(String revision) {
+    return forStableAtRevision(null, revision);
   }
 
   /**
