@@ -44,6 +44,7 @@ public class BootStrapperTest {
     daemon.stop();
     assert daemon.waitForDown();
     
+    bootStrapper.deleteGalaxyRoot();
   }
   
   /**
@@ -61,6 +62,8 @@ public class BootStrapperTest {
     String actualRevision = getCurrentMercurialRevisionHash(rootDir);
     
     assert expectedRevision.equalsIgnoreCase(actualRevision);
+    
+    bootStrapper.deleteGalaxyRoot();
   }
   
   /**
