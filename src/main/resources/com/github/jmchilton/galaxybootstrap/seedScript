@@ -2,11 +2,9 @@ from scripts.db_shell import *
 from galaxy.util.bunch import Bunch
 from galaxy.security import GalaxyRBACAgent
 bunch = Bunch( **globals() )
-bunch.engine = engine
-# model.flush() has been removed.
-bunch.session = db_session
+bunch.session = sa_session
 # For backward compatibility with "model.context.current"
-bunch.context = db_session
+bunch.context = sa_session
 security_agent = GalaxyRBACAgent( bunch )
 security_agent.sa_session = sa_session
 
