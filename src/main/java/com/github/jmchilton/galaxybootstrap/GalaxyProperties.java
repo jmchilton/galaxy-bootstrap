@@ -42,6 +42,18 @@ public class GalaxyProperties {
     return prepopulateSqliteDatabase(Resources.getResource(GalaxyProperties.class, "universe.sqlite"));
   }
   
+  /**
+   * 
+   * @return True if it should be inferred that Galaxy is targeting a brand
+   *  new database and create_db.sh should be executed.
+   */
+  public boolean isCreateDatabaseRequired() {
+    // Logic in here could be better, database_url may be set and pointing at
+    // an existing database - so there should be an option to disable this
+    // without specifing a prepopulated sqlite database.
+    return !database.isPresent();
+  }
+  
   public GalaxyProperties prepopulateSqliteDatabase(final URL database) {
     this.database = Optional.of(database);
     // Set database auto migrate to true so database

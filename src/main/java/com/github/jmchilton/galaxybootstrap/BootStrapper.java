@@ -76,10 +76,12 @@ public class BootStrapper {
     galaxyProperties.configureGalaxy(getRoot());
     executeGalaxyScript("python scripts/fetch_eggs.py 1> "
       + buildLogPath(bootstrapLogDir,"fetch_eggs.log") + " 2>&1");
-    
-    executeGalaxyScript("sh create_db.sh 1> " 
-      + buildLogPath(bootstrapLogDir,"create_db.log") + " 2>&1");
-    
+ 
+    if(galaxyProperties.isCreateDatabaseRequired()) {
+      executeGalaxyScript("sh create_db.sh 1> " 
+        + buildLogPath(bootstrapLogDir,"create_db.log") + " 2>&1");
+    }
+
     if(galaxyData != null) {
       galaxyData.writeSeedScript(new File(getRoot(), "seed.py"));
       executeGalaxyScript("python seed.py 1> " 
