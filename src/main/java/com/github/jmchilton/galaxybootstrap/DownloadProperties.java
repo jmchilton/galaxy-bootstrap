@@ -296,7 +296,7 @@ public class DownloadProperties {
      * @return  The Galaxy repository cache.
      */
     private File getCacheDir(String repositoryUrl) {
-      final String repoHash = Hashing.md5().hashString(repositoryUrl).toString();
+      final String repoHash = Hashing.md5().hashUnencodedChars(repositoryUrl).toString();
       final File cache = new File(Config.home(), repoHash);
       
       return cache;
