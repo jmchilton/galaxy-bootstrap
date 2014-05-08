@@ -209,7 +209,7 @@ public class DownloadProperties {
    * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
    */
   public static DownloadProperties forGalaxyCentral(final File destination) {
-    return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_STABLE, destination);
+    return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_DEFAULT, destination);
   }
   
   /**
@@ -220,7 +220,7 @@ public class DownloadProperties {
    * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
    */
   public static DownloadProperties forGalaxyCentral(final File destination, String revision) {
-    return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_STABLE, revision, destination);
+    return new DownloadProperties(GALAXY_CENTRAL_REPOSITORY_URL, BRANCH_DEFAULT, revision, destination);
   }
   
   /**
