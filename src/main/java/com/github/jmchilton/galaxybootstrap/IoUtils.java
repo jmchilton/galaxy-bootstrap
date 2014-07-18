@@ -1,12 +1,18 @@
 package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.base.Joiner;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class IoUtils {
+  
+  private static final Logger logger = LoggerFactory.getLogger(IoUtils.class); 
   
   /**
    * Returns a free port number on localhost.
@@ -67,14 +73,17 @@ class IoUtils {
   static void executeAndWait(final String[] commands, final Map<String, String> properties) {
     try {
       final ProcessBuilder builder = new ProcessBuilder(commands);
+      String commandString = Joiner.on(" ").join(commands);
+      
       if(properties != null) {
         builder.environment().putAll(properties);
       }
+      logger.debug("Executing command: \"" + commandString + "\"");
       final Process p = builder.start();
       final int returnCode = p.waitFor();
       if(returnCode != 0) {
         final String message = "Execution of command [%s] failed.";
-        throw new RuntimeException(String.format(message, Joiner.on(" ").join(commands)));
+        throw new RuntimeException(String.format(message, commandString));
       }
     } catch(IOException ex) {
       throw new RuntimeException(ex);
@@ -90,7 +99,10 @@ class IoUtils {
   static Process execute(final String... commands) {
     final ProcessBuilder builder = new ProcessBuilder(commands);
     final Process process;
+    String commandString = Joiner.on(" ").join(commands);
+    
     try {
+      logger.debug("Executing command: \"" + commandString + "\"");
       process = builder.start();
     } catch(IOException ex) { 
       throw new RuntimeException(ex);

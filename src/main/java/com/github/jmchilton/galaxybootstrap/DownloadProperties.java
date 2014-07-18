@@ -1,6 +1,7 @@
 package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.hash.Hashing;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,10 +11,16 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** 
  * Defines basic properties used for obtaining Galaxy instance.
  */
 public class DownloadProperties {
+	
+  private static final Logger logger = LoggerFactory
+  		.getLogger(DownloadProperties.class);
 	
   public static final String GITHUB_MASTER_URL = "https://codeload.github.com/jmchilton/galaxy-central/zip/master";
   public static final String GALAXY_DIST_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-dist";
@@ -248,7 +255,11 @@ public class DownloadProperties {
    */
   void download() {
     final String path = location.getAbsolutePath();
+    
+    logger.debug("About to download Galaxy");
+    logger.debug(downloader.toString());
     this.downloader.downloadTo(location, cache);
+    logger.debug("Finished downloading Galaxy");
   }
 
   @Override
