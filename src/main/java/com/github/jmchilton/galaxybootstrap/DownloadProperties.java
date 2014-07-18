@@ -256,9 +256,10 @@ public class DownloadProperties {
   void download() {
     final String path = location.getAbsolutePath();
     
-    logger.info("About to download Galaxy from " + downloader.toString());
+    logger.info("About to download Galaxy from " + downloader.toString()
+        + " to " + path);
     this.downloader.downloadTo(location, cache);
-    logger.info("Finished downloading Galaxy");
+    logger.info("Finished downloading Galaxy to " + path);
   }
 
   @Override

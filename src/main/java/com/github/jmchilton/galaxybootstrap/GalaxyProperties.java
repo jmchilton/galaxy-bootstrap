@@ -25,8 +25,13 @@ public class GalaxyProperties {
   private final Map<String, String> appProperties = Maps.newHashMap();
   private final Map<String, String> serverProperties = Maps.newHashMap();
   private int port = 8080;  // default
+  private String galaxyURL = adjustGalaxyURL(port);
   private boolean configureNestedShedTools = false;
   private Optional<URL> database = Optional.absent();
+  
+  private static String adjustGalaxyURL(int port) {
+    return "http://localhost:" + port + "/";
+  }
   
   public GalaxyProperties setAppProperty(final String name, final String value) {
     appProperties.put(name, value);
@@ -65,6 +70,7 @@ public class GalaxyProperties {
   public GalaxyProperties assignFreePort() {
     port = IoUtils.findFreePort();
     serverProperties.put("port", Integer.toString(port));
+    galaxyURL = adjustGalaxyURL(port);
     return this;
   }
   
@@ -127,6 +133,10 @@ public class GalaxyProperties {
 
   public int getPort() {
     return port;
+  }
+  
+  public String getGalaxyURL() {
+    return galaxyURL;
   }
 
 }

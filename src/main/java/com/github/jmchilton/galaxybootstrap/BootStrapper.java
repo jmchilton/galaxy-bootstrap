@@ -2,7 +2,14 @@ package com.github.jmchilton.galaxybootstrap;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BootStrapper {
+  
+  private static final Logger logger = LoggerFactory
+      .getLogger(BootStrapper.class);
+  
   private final DownloadProperties downloadProperties;
   private final String galaxyLogDirName = "bootstrap-log";
 
@@ -75,6 +82,7 @@ public class BootStrapper {
       }
     }
     
+    logger.info("Starting setup of Galaxy, logDir=" + bootstrapLogDir);
     galaxyProperties.configureGalaxy(getRoot());
     executeGalaxyScript("python scripts/fetch_eggs.py 1> "
       + buildLogPath(bootstrapLogDir,"fetch_eggs.log") + " 2>&1");
@@ -89,6 +97,9 @@ public class BootStrapper {
       executeGalaxyScript("python seed.py 1> " 
         + buildLogPath(bootstrapLogDir,"seed.log") + " 2>&1");
     }
+    logger.info("Galaxy setup complete");
+    
+    logger.info("Running Galaxy on " + galaxyProperties.getGalaxyURL());
     final Process process = IoUtils.execute("sh", new File(getPath(), "run.sh").getAbsolutePath(), "--daemon");
     return new GalaxyDaemon(galaxyProperties, getRoot(), this);
   }
@@ -97,10 +108,15 @@ public class BootStrapper {
    * Deletes the Galaxy root directory.
    */
   public void deleteGalaxyRoot() {
+    logger.info("Deleting Galaxy directory " + getPath());
     IoUtils.executeAndWait("/bin/rm", "-rf", getPath());
   }
 
   public static class GalaxyDaemon {
+    
+    private static final Logger logger = LoggerFactory
+        .getLogger(GalaxyDaemon.class);
+    
     private final GalaxyProperties galaxyProperties;
     private final File galaxyRoot;
     private final BootStrapper bootStrapper;
@@ -130,7 +146,8 @@ public class BootStrapper {
     /**
      * Stops the currently running Galaxy instance.
      */
-    public void stop() {
+    public void stop() {    
+      logger.info("Stopping Galaxy running on " + galaxyProperties.getGalaxyURL());
       final Process process = IoUtils.execute("sh", new File(galaxyRoot, "run.sh").getAbsolutePath(), "--stop-daemon");
       try {
         process.waitFor();
@@ -175,17 +192,22 @@ public class BootStrapper {
       for(int i = 0; i < 600; i++) {
         correctState = up() == up;
         if(correctState) {
+          logger.debug("Galaxy is " + (up ? "up on " : "down on ")
+              + galaxyProperties.getGalaxyURL());
           break;
         }
+        
+        logger.debug("Galaxy is not yet " + (up ? "up on " : "down on ")
+            + galaxyProperties.getGalaxyURL() + " checking again");
         try {
           Thread.sleep(1000L);
         } catch(InterruptedException ex) {
           throw new RuntimeException(ex);
         }
       }
+      
       return correctState;
     }
-
   }
   
   
