@@ -18,3 +18,10 @@ application.
 - Maven 
 - Mercurial
 
+### Logging
+
+Logging is provided by [log4j](http://logging.apache.org/log4j/).  Additional information can be displayed by setting the level to DEBUG.  For example:
+
+```bash
+mvn test -Dlog4j.logger.com.github.jmchilton.galaxybootstrap=DEBUG
+```
