@@ -7,16 +7,23 @@ import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author John Chilton
  */
 public class GalaxyData {
+  
+  private static final Logger logger = LoggerFactory
+      .getLogger(GalaxyData.class);
   
   public static class User {
     private String username;
@@ -76,6 +83,8 @@ public class GalaxyData {
         line.append(user.apiKey);
         line.append("')\n");
         scriptBuilder.append(line);
+        
+        logger.debug("Adding user: " + line);
       }
       charSink.write(scriptBuilder);
     } catch(final IOException ioException) {

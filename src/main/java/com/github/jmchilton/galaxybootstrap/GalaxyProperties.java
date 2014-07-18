@@ -8,20 +8,28 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
+
 import org.ini4j.Ini;
 import org.ini4j.Profile.Section;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author John Chilton
  */
 public class GalaxyProperties {
+  
+  private static final Logger logger = LoggerFactory
+      .getLogger(GalaxyProperties.class);
+  
   private final Map<String, String> appProperties = Maps.newHashMap();
   private final Map<String, String> serverProperties = Maps.newHashMap();
   private int port = 8080;  // default
@@ -85,6 +93,7 @@ public class GalaxyProperties {
   
   public void setAdminUsers(final Iterable<String> usernames) {
     final String usernamesStr = Joiner.on(",").join(usernames);
+    logger.debug("Setting admin users: " + usernamesStr);
     setAppProperty("admin_users", usernamesStr);
   }
 
