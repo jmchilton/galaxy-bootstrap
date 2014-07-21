@@ -16,6 +16,7 @@ public class BootStrapper {
   /**
    * Builds a bootstrapper object with the default settings.
    */
+  @SuppressWarnings("deprecation")
   public BootStrapper() {
     this(new DownloadProperties());
   }
@@ -98,7 +99,7 @@ public class BootStrapper {
     logger.info("Galaxy setup complete");
     
     logger.info("Running Galaxy on " + galaxyProperties.getGalaxyURL());
-    final Process process = IoUtils.execute("sh", new File(getPath(), "run.sh").getAbsolutePath(), "--daemon");
+    IoUtils.execute("sh", new File(getPath(), "run.sh").getAbsolutePath(), "--daemon");
     return new GalaxyDaemon(galaxyProperties, getRoot(), this);
   }
   

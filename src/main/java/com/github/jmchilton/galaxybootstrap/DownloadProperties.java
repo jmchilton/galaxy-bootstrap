@@ -277,7 +277,7 @@ public class DownloadProperties {
   }
 
   /**
-   *  Defines a downloader to download Galaxy from Mercurial. 
+   *  Defines a downloader to download Galaxy from Mercurial. final Process process = 
    */
   private static class HgDownloader implements Downloader {
     private final String branch;
@@ -380,6 +380,7 @@ public class DownloadProperties {
   /**
    * Defines a downloader to download Galaxy from github using Java.
    */
+  @SuppressWarnings("unused")
   private static class JavaGithubDownloader implements Downloader {
     // WAY TO SLOW.
     @Override

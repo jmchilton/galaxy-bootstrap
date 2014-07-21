@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author John Chilton
  */
+@SuppressWarnings("deprecation")
 public class GalaxyProperties {
   
   private static final Logger logger = LoggerFactory
