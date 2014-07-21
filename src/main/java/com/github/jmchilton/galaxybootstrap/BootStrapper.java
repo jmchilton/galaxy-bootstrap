@@ -26,8 +26,6 @@ public class BootStrapper {
    */
   public BootStrapper(final DownloadProperties downloadProperties) {
     this.downloadProperties = downloadProperties;
-    
-    LoggerUtils.configureLog4jFromSystemProperties();
   }
 
   /**
