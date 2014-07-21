@@ -20,8 +20,9 @@ application.
 
 ### Logging
 
-Logging is provided by [log4j](http://logging.apache.org/log4j/).  Additional information can be displayed by setting the level to DEBUG.  For example:
+Logging is provided by [log4j](http://logging.apache.org/log4j/).  Additional information can be displayed by setting the level from `INFO` to `DEBUG` within `src/main/resources/log4j.properties` or by passing a new properties file on the command line.  For example:
 
 ```bash
-mvn test -Dlog4j.logger.com.github.jmchilton.galaxybootstrap=DEBUG
+cp src/main/resources/log4j.properties ./
+mvn test -Dlog4j.configuration=file:./log4j.properties
 ```
