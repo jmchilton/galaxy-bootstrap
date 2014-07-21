@@ -197,7 +197,7 @@ public class BootStrapper {
           break;
         }
         
-        logger.debug("Galaxy is not yet " + (up ? "up on " : "down on ")
+        logger.trace("Galaxy is not yet " + (up ? "up on " : "down on ")
             + galaxyProperties.getGalaxyURL() + " checking again");
         try {
           Thread.sleep(1000L);
