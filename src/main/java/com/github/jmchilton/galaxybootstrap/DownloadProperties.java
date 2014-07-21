@@ -277,7 +277,7 @@ public class DownloadProperties {
   }
 
   /**
-   *  Defines a downloader to download Galaxy from Mercurial. final Process process = 
+   *  Defines a downloader to download Galaxy from Mercurial.
    */
   private static class HgDownloader implements Downloader {
     private final String branch;
