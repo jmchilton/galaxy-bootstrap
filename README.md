@@ -18,3 +18,6 @@ application.
 - Maven 
 - Mercurial
 
+### Logging
+
+Logging is provided by [slf4j](http://www.slf4j.org/).  Please refer to the documentation for more information on how to configure logging.

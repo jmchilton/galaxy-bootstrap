@@ -8,25 +8,39 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
+
 import org.ini4j.Ini;
 import org.ini4j.Profile.Section;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author John Chilton
  */
+@SuppressWarnings("deprecation")
 public class GalaxyProperties {
+  
+  private static final Logger logger = LoggerFactory
+      .getLogger(GalaxyProperties.class);
+  
   private final Map<String, String> appProperties = Maps.newHashMap();
   private final Map<String, String> serverProperties = Maps.newHashMap();
   private int port = 8080;  // default
+  private String galaxyURL = adjustGalaxyURL(port);
   private boolean configureNestedShedTools = false;
   private Optional<URL> database = Optional.absent();
+  
+  private static String adjustGalaxyURL(int port) {
+    return "http://localhost:" + port + "/";
+  }
   
   public GalaxyProperties setAppProperty(final String name, final String value) {
     appProperties.put(name, value);
@@ -65,6 +79,7 @@ public class GalaxyProperties {
   public GalaxyProperties assignFreePort() {
     port = IoUtils.findFreePort();
     serverProperties.put("port", Integer.toString(port));
+    galaxyURL = adjustGalaxyURL(port);
     return this;
   }
   
@@ -79,6 +94,7 @@ public class GalaxyProperties {
   
   public void setAdminUsers(final Iterable<String> usernames) {
     final String usernamesStr = Joiner.on(",").join(usernames);
+    logger.debug("Setting admin users: " + usernamesStr);
     setAppProperty("admin_users", usernamesStr);
   }
 
@@ -127,6 +143,10 @@ public class GalaxyProperties {
 
   public int getPort() {
     return port;
+  }
+  
+  public String getGalaxyURL() {
+    return galaxyURL;
   }
 
 }
