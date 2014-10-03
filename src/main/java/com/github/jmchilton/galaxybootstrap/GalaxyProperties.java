@@ -107,7 +107,11 @@ public class GalaxyProperties {
         new File(galaxyRoot, "shed_tools").mkdirs();
       }
 
-      final File sampleIni = new File(galaxyRoot, "universe_wsgi.ini.sample");
+      final File configDirectory = new File(galaxyRoot, "config");
+      File sampleIni = new File(configDirectory, "galaxy.ini.sample");
+      if(!sampleIni.exists()) {
+        sampleIni = new File(galaxyRoot, "universe_wsgi.ini.sample");
+      }
       final Ini ini = new Ini(new FileReader(sampleIni));
       final Section appSection = ini.get("app:main");
       final boolean toolsConfigured = appProperties.containsKey("tool_config_file");
