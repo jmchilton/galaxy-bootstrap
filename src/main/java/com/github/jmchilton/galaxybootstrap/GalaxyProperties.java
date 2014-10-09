@@ -109,8 +109,12 @@ public class GalaxyProperties {
 
       final File configDirectory = new File(galaxyRoot, "config");
       File sampleIni = new File(configDirectory, "galaxy.ini.sample");
+      File configIni;
       if(!sampleIni.exists()) {
         sampleIni = new File(galaxyRoot, "universe_wsgi.ini.sample");
+        configIni = new File(galaxyRoot, "universe_wsgi.ini");
+      } else {
+        configIni = new File(configDirectory, "galaxy.ini");
       }
       final Ini ini = new Ini(new FileReader(sampleIni));
       final Section appSection = ini.get("app:main");
@@ -127,7 +131,6 @@ public class GalaxyProperties {
       dumpMapToSection(appSection, appProperties);
       final Section serverSection = ini.get("server:main");
       dumpMapToSection(serverSection, serverProperties);
-      final File configIni = new File(galaxyRoot, "universe_wsgi.ini");
       ini.store(configIni);
       
       final File databaseDirectory = new File(galaxyRoot, "database");
