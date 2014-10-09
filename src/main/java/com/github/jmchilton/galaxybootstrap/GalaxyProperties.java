@@ -97,6 +97,15 @@ public class GalaxyProperties {
     logger.debug("Setting admin users: " + usernamesStr);
     setAppProperty("admin_users", usernamesStr);
   }
+  
+  /**
+   * Determines if we are using old-style (pre-2014.10.06 release) config directory structure.
+   * @param configDirectory  The config directory relative to the Galaxy root.
+   * @return  True if we are using the old-style config structure, false otherwise.
+   */
+  private boolean isOldStyleConfigStructure(File configDirectory) {
+    return !(new File(configDirectory, "galaxy.ini.sample")).exists();
+  }
 
   public void configureGalaxy(final File galaxyRoot) {
     try {
@@ -108,13 +117,22 @@ public class GalaxyProperties {
       }
 
       final File configDirectory = new File(galaxyRoot, "config");
-      File sampleIni = new File(configDirectory, "galaxy.ini.sample");
+      File sampleIni;
       File configIni;
-      if(!sampleIni.exists()) {
+      if(isOldStyleConfigStructure(configDirectory)) {
         sampleIni = new File(galaxyRoot, "universe_wsgi.ini.sample");
         configIni = new File(galaxyRoot, "universe_wsgi.ini");
       } else {
+        sampleIni = new File(configDirectory, "galaxy.ini.sample");
         configIni = new File(configDirectory, "galaxy.ini");
+        
+        File toolConfSample = new File(configDirectory, "tool_conf.xml.sample");
+        File toolConf = new File(configDirectory, "tool_conf.xml");
+        Files.copy(toolConfSample, toolConf);
+        
+        File shedToolConfSample = new File(configDirectory, "shed_tool_conf.xml.sample");
+        File shedToolConf = new File(configDirectory, "shed_tool_conf.xml");
+        Files.copy(shedToolConfSample, shedToolConf);
       }
       final Ini ini = new Ini(new FileReader(sampleIni));
       final Section appSection = ini.get("app:main");
