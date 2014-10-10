@@ -38,6 +38,8 @@ public class GalaxyProperties {
   private boolean configureNestedShedTools = false;
   private Optional<URL> database = Optional.absent();
   
+  private static final String CONFIG_DIR_NAME = "config";
+  
   private static String adjustGalaxyURL(int port) {
     return "http://localhost:" + port + "/";
   }
@@ -97,6 +99,97 @@ public class GalaxyProperties {
     logger.debug("Setting admin users: " + usernamesStr);
     setAppProperty("admin_users", usernamesStr);
   }
+  
+  /**
+   * Determines if this is a pre-2014.10.06 release of Galaxy.
+   * @param galaxyRoot  The root directory of Galaxy.
+   * @return  True if this is a pre-2014.10.06 release of Galaxy, false otherwise.
+   */
+  public boolean isPre20141006Release(File galaxyRoot) {
+    if (galaxyRoot == null) {
+      throw new IllegalArgumentException("galaxyRoot is null");
+    } else if (!galaxyRoot.exists()) {
+      throw new IllegalArgumentException("galaxyRoot=" + galaxyRoot.getAbsolutePath() + " does not exist");
+    }
+    
+    File configDirectory = new File(galaxyRoot, CONFIG_DIR_NAME);
+    return !(new File(configDirectory, "galaxy.ini.sample")).exists();
+  }
+  
+  /**
+   * Gets the sample config ini for this Galaxy installation.
+   * @param galaxyRoot  The root directory of Galaxy.
+   * @return  A File object for the sample config ini for Galaxy.
+   */
+  private File getConfigSampleIni(File galaxyRoot) {
+    if (isPre20141006Release(galaxyRoot)) {
+      return new File(galaxyRoot, "universe_wsgi.ini.sample");
+    } else {
+      File configDirectory = new File(galaxyRoot, CONFIG_DIR_NAME);
+      return new File(configDirectory, "galaxy.ini.sample");
+    }
+  }
+  
+  /**
+   * Gets the config ini for this Galaxy installation.
+   * @param galaxyRoot  The root directory of Galaxy.
+   * @return  A File object for the config ini for Galaxy.
+   */
+  private File getConfigIni(File galaxyRoot) {
+    if (isPre20141006Release(galaxyRoot)) {
+      return new File(galaxyRoot, "universe_wsgi.ini");
+    } else {
+      File configDirectory = new File(galaxyRoot, CONFIG_DIR_NAME);
+      return new File(configDirectory, "galaxy.ini");
+    }
+  }
+  
+  /**
+   * Gets path to a config file for Galaxy relative to the Galaxy root directory.
+   *  This will check for the existence of the file and attempt to copy it from a *.sample file
+   *  if it does not exist.
+   * @param galaxyRoot  The Galaxy root directory.
+   * @param configFileName  The name of the config file to get.
+   * @return  The path to the config file relative to the Galaxy root.
+   * @throws IOException  If the copy failed.
+   */
+  private String getConfigPathFromRoot(File galaxyRoot, String configFileName) throws IOException {
+    if (isPre20141006Release(galaxyRoot)) {
+      return configFileName;
+    } else {
+      File configDirectory = new File(galaxyRoot, CONFIG_DIR_NAME);
+      File toolConf = new File(configDirectory, configFileName);
+      
+      // if config file does not exist, copy it from the .sample version
+      if (!toolConf.exists()) {
+        File toolConfSample = new File(configDirectory, configFileName + ".sample");
+        Files.copy(toolConfSample, toolConf);
+      }
+      
+      return CONFIG_DIR_NAME + "/" + configFileName;
+    }
+  }
+  
+  /**
+   * Gets a path for the tool_conf.xml file relative to the Galaxy root.
+   * @param galaxyRoot  The Galaxy root directory.
+   * @return  The path to the tool_conf.xml file.
+   * @throws IOException  If there was an error copying the *.sample file.
+   */
+  private String getToolConfigPathFromRoot(File galaxyRoot) throws IOException {
+    return getConfigPathFromRoot(galaxyRoot, "tool_conf.xml");
+  }
+  
+  /**
+   * Gets a path for the shed_tool_conf.xml file relative to the Galaxy root.
+   * @param galaxyRoot  The Galaxy root directory.
+   * @return  The path to the shed_tool_conf.xml file.
+   * @throws IOException  If there was an error copying the *.sample file.
+   */
+  private String getShedToolConfigPathFromRoot(File galaxyRoot) throws IOException {
+    return getConfigPathFromRoot(galaxyRoot, "shed_tool_conf.xml");
+  }
+
 
   public void configureGalaxy(final File galaxyRoot) {
     try {
@@ -107,16 +200,15 @@ public class GalaxyProperties {
         new File(galaxyRoot, "shed_tools").mkdirs();
       }
 
-      final File configDirectory = new File(galaxyRoot, "config");
-      File sampleIni = new File(configDirectory, "galaxy.ini.sample");
-      if(!sampleIni.exists()) {
-        sampleIni = new File(galaxyRoot, "universe_wsgi.ini.sample");
-      }
+      File sampleIni = getConfigSampleIni(galaxyRoot);
+      File configIni = getConfigIni(galaxyRoot);
       final Ini ini = new Ini(new FileReader(sampleIni));
       final Section appSection = ini.get("app:main");
       final boolean toolsConfigured = appProperties.containsKey("tool_config_file");
       if(!toolsConfigured && configureNestedShedTools) {
-        appProperties.put("tool_config_file", "tool_conf.xml,shed_tool_conf.xml");
+        String toolConfPath = getToolConfigPathFromRoot(galaxyRoot);
+        String shedToolConfPath = getShedToolConfigPathFromRoot(galaxyRoot);
+        appProperties.put("tool_config_file", toolConfPath + "," + shedToolConfPath);
       }
       // Hack to work around following bug: https://trello.com/c/nKxmP6Vc
       // Without this, galaxy will not startup because of problems
@@ -127,7 +219,6 @@ public class GalaxyProperties {
       dumpMapToSection(appSection, appProperties);
       final Section serverSection = ini.get("server:main");
       dumpMapToSection(serverSection, serverProperties);
-      final File configIni = new File(galaxyRoot, "universe_wsgi.ini");
       ini.store(configIni);
       
       final File databaseDirectory = new File(galaxyRoot, "database");
