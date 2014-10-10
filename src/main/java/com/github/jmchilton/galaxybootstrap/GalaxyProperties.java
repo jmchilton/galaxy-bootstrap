@@ -143,6 +143,53 @@ public class GalaxyProperties {
       return new File(configDirectory, "galaxy.ini");
     }
   }
+  
+  /**
+   * Gets path to a config file for Galaxy relative to the Galaxy root directory.
+   *  This will check for the existence of the file and attempt to copy it from a *.sample file
+   *  if it does not exist.
+   * @param galaxyRoot  The Galaxy root directory.
+   * @param configFileName  The name of the config file to get.
+   * @return  The path to the config file relative to the Galaxy root.
+   * @throws IOException  If the copy failed.
+   */
+  private String getConfigPathFromRoot(File galaxyRoot, String configFileName) throws IOException {
+    if (isPre20141006Release(galaxyRoot)) {
+      return configFileName;
+    } else {
+      File configDirectory = new File(galaxyRoot, CONFIG_DIR_NAME);
+      File toolConf = new File(configDirectory, configFileName);
+      
+      // if config file does not exist, copy it from the .sample version
+      if (!toolConf.exists()) {
+        File toolConfSample = new File(configDirectory, configFileName + ".sample");
+        Files.copy(toolConfSample, toolConf);
+      }
+      
+      return CONFIG_DIR_NAME + "/" + configFileName;
+    }
+  }
+  
+  /**
+   * Gets a path for the tool_conf.xml file relative to the Galaxy root.
+   * @param galaxyRoot  The Galaxy root directory.
+   * @return  The path to the tool_conf.xml file.
+   * @throws IOException  If there was an error copying the *.sample file.
+   */
+  private String getToolConfigPathFromRoot(File galaxyRoot) throws IOException {
+    return getConfigPathFromRoot(galaxyRoot, "tool_conf.xml");
+  }
+  
+  /**
+   * Gets a path for the shed_tool_conf.xml file relative to the Galaxy root.
+   * @param galaxyRoot  The Galaxy root directory.
+   * @return  The path to the shed_tool_conf.xml file.
+   * @throws IOException  If there was an error copying the *.sample file.
+   */
+  private String getShedToolConfigPathFromRoot(File galaxyRoot) throws IOException {
+    return getConfigPathFromRoot(galaxyRoot, "shed_tool_conf.xml");
+  }
+
 
   public void configureGalaxy(final File galaxyRoot) {
     try {
@@ -159,7 +206,9 @@ public class GalaxyProperties {
       final Section appSection = ini.get("app:main");
       final boolean toolsConfigured = appProperties.containsKey("tool_config_file");
       if(!toolsConfigured && configureNestedShedTools) {
-        appProperties.put("tool_config_file", "tool_conf.xml,shed_tool_conf.xml");
+        String toolConfPath = getToolConfigPathFromRoot(galaxyRoot);
+        String shedToolConfPath = getShedToolConfigPathFromRoot(galaxyRoot);
+        appProperties.put("tool_config_file", toolConfPath + "," + shedToolConfPath);
       }
       // Hack to work around following bug: https://trello.com/c/nKxmP6Vc
       // Without this, galaxy will not startup because of problems
