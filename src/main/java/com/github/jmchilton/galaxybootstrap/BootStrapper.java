@@ -84,7 +84,7 @@ public class BootStrapper {
     logger.info("Starting setup of Galaxy, logDir=" + bootstrapLogDir);
     galaxyProperties.configureGalaxy(getRoot());
     
-    if (!galaxyProperties.isOldStyleConfigStructure(getRoot())) {
+    if (!galaxyProperties.isPre20141006Release(getRoot())) {
       executeGalaxyScript("sh scripts/common_startup.sh 1> " 
           + buildLogPath(bootstrapLogDir,"common_startup.log") + " 2>&1");
     }

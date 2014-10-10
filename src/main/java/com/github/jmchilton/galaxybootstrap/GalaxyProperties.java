@@ -38,6 +38,8 @@ public class GalaxyProperties {
   private boolean configureNestedShedTools = false;
   private Optional<URL> database = Optional.absent();
   
+  private static final String CONFIG_DIR_NAME = "config";
+  
   private static String adjustGalaxyURL(int port) {
     return "http://localhost:" + port + "/";
   }
@@ -99,19 +101,47 @@ public class GalaxyProperties {
   }
   
   /**
-   * Determines if we are using old-style (pre-2014.10.06 release) config directory structure.
+   * Determines if this is a pre-2014.10.06 release of Galaxy.
    * @param galaxyRoot  The root directory of Galaxy.
-   * @return  True if we are using the old-style config structure, false otherwise.
+   * @return  True if this is a pre-2014.10.06 release of Galaxy, false otherwise.
    */
-  public boolean isOldStyleConfigStructure(File galaxyRoot) {
+  public boolean isPre20141006Release(File galaxyRoot) {
     if (galaxyRoot == null) {
       throw new IllegalArgumentException("galaxyRoot is null");
     } else if (!galaxyRoot.exists()) {
       throw new IllegalArgumentException("galaxyRoot=" + galaxyRoot.getAbsolutePath() + " does not exist");
     }
     
-    File configDirectory = new File(galaxyRoot, "config");
+    File configDirectory = new File(galaxyRoot, CONFIG_DIR_NAME);
     return !(new File(configDirectory, "galaxy.ini.sample")).exists();
+  }
+  
+  /**
+   * Gets the sample config ini for this Galaxy installation.
+   * @param galaxyRoot  The root directory of Galaxy.
+   * @return  A File object for the sample config ini for Galaxy.
+   */
+  private File getConfigSampleIni(File galaxyRoot) {
+    if (isPre20141006Release(galaxyRoot)) {
+      return new File(galaxyRoot, "universe_wsgi.ini.sample");
+    } else {
+      File configDirectory = new File(galaxyRoot, CONFIG_DIR_NAME);
+      return new File(configDirectory, "galaxy.ini.sample");
+    }
+  }
+  
+  /**
+   * Gets the config ini for this Galaxy installation.
+   * @param galaxyRoot  The root directory of Galaxy.
+   * @return  A File object for the config ini for Galaxy.
+   */
+  private File getConfigIni(File galaxyRoot) {
+    if (isPre20141006Release(galaxyRoot)) {
+      return new File(galaxyRoot, "universe_wsgi.ini");
+    } else {
+      File configDirectory = new File(galaxyRoot, CONFIG_DIR_NAME);
+      return new File(configDirectory, "galaxy.ini");
+    }
   }
 
   public void configureGalaxy(final File galaxyRoot) {
@@ -123,16 +153,8 @@ public class GalaxyProperties {
         new File(galaxyRoot, "shed_tools").mkdirs();
       }
 
-      File sampleIni;
-      File configIni;
-      if(isOldStyleConfigStructure(galaxyRoot)) {
-        sampleIni = new File(galaxyRoot, "universe_wsgi.ini.sample");
-        configIni = new File(galaxyRoot, "universe_wsgi.ini");
-      } else {
-        File configDirectory = new File(galaxyRoot, "config");
-        sampleIni = new File(configDirectory, "galaxy.ini.sample");
-        configIni = new File(configDirectory, "galaxy.ini");
-      }
+      File sampleIni = getConfigSampleIni(galaxyRoot);
+      File configIni = getConfigIni(galaxyRoot);
       final Ini ini = new Ini(new FileReader(sampleIni));
       final Section appSection = ini.get("app:main");
       final boolean toolsConfigured = appProperties.containsKey("tool_config_file");
