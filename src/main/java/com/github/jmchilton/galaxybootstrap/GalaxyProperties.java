@@ -100,10 +100,17 @@ public class GalaxyProperties {
   
   /**
    * Determines if we are using old-style (pre-2014.10.06 release) config directory structure.
-   * @param configDirectory  The config directory relative to the Galaxy root.
+   * @param galaxyRoot  The root directory of Galaxy.
    * @return  True if we are using the old-style config structure, false otherwise.
    */
-  private boolean isOldStyleConfigStructure(File configDirectory) {
+  public boolean isOldStyleConfigStructure(File galaxyRoot) {
+    if (galaxyRoot == null) {
+      throw new IllegalArgumentException("galaxyRoot is null");
+    } else if (!galaxyRoot.exists()) {
+      throw new IllegalArgumentException("galaxyRoot=" + galaxyRoot.getAbsolutePath() + " does not exist");
+    }
+    
+    File configDirectory = new File(galaxyRoot, "config");
     return !(new File(configDirectory, "galaxy.ini.sample")).exists();
   }
 
@@ -116,23 +123,15 @@ public class GalaxyProperties {
         new File(galaxyRoot, "shed_tools").mkdirs();
       }
 
-      final File configDirectory = new File(galaxyRoot, "config");
       File sampleIni;
       File configIni;
-      if(isOldStyleConfigStructure(configDirectory)) {
+      if(isOldStyleConfigStructure(galaxyRoot)) {
         sampleIni = new File(galaxyRoot, "universe_wsgi.ini.sample");
         configIni = new File(galaxyRoot, "universe_wsgi.ini");
       } else {
+        File configDirectory = new File(galaxyRoot, "config");
         sampleIni = new File(configDirectory, "galaxy.ini.sample");
         configIni = new File(configDirectory, "galaxy.ini");
-        
-        File toolConfSample = new File(configDirectory, "tool_conf.xml.sample");
-        File toolConf = new File(configDirectory, "tool_conf.xml");
-        Files.copy(toolConfSample, toolConf);
-        
-        File shedToolConfSample = new File(configDirectory, "shed_tool_conf.xml.sample");
-        File shedToolConf = new File(configDirectory, "shed_tool_conf.xml");
-        Files.copy(shedToolConfSample, shedToolConf);
       }
       final Ini ini = new Ini(new FileReader(sampleIni));
       final Section appSection = ini.get("app:main");
