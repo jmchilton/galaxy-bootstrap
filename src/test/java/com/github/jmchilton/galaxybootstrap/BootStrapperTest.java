@@ -78,6 +78,20 @@ public class BootStrapperTest {
   }
   
   /**
+   * Tests to make sure downloading Galaxy from github master branch works.
+   * @throws IOException 
+   * @throws InterruptedException 
+   */
+  @Test
+  public void testGithubMasterBranch() throws InterruptedException, IOException {
+    final BootStrapper bootStrapper = new BootStrapper(DownloadProperties.wgetGithubMaster());
+
+    testSetupGalaxyFor(bootStrapper);
+
+    bootStrapper.deleteGalaxyRoot();
+  }
+  
+  /**
    * Tests Galaxy for a specific setup.
    * @param bootStrapper  The BootStrapper used for setting up Galaxy.
    * @throws InterruptedException
