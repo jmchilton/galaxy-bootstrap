@@ -218,7 +218,7 @@ public class BootStrapper {
   
   
   /**
-   * Setup the definied instance of Galaxy.
+   * Setup the defined instance of Galaxy.
    */
   public void setupGalaxy() {
     downloadProperties.download();
