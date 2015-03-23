@@ -27,7 +27,10 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("deprecation")
 public class GalaxyProperties {
-  
+  public static enum ConfigureVirtualenv {
+    YES, NO, AUTO;
+  }
+
   private static final Logger logger = LoggerFactory
       .getLogger(GalaxyProperties.class);
   
@@ -36,6 +39,7 @@ public class GalaxyProperties {
   private int port = 8080;  // default
   private String galaxyURL = adjustGalaxyURL(port);
   private boolean configureNestedShedTools = false;
+  private ConfigureVirtualenv configureVirtualenv = ConfigureVirtualenv.AUTO;
   private Optional<URL> database = Optional.absent();
   
   private static final String CONFIG_DIR_NAME = "config";
@@ -100,6 +104,21 @@ public class GalaxyProperties {
     setAppProperty("admin_users", usernamesStr);
   }
   
+  /**
+   * Determines if a virtualenv should be created for Galaxy.
+   * @return True iff a virtualenv should be created.
+   */
+  public boolean shouldConfigureVirtualenv() {
+    if(this.configureVirtualenv == ConfigureVirtualenv.NO) {
+      return false;
+    } else if(this.configureVirtualenv == ConfigureVirtualenv.YES) {
+      return true;
+    } else {
+      final Optional<File> whichVirtualenv = this.which("virtualenv");
+      return whichVirtualenv.isPresent();
+    }
+  }
+
   /**
    * Determines if this is a pre-2014.10.06 release of Galaxy.
    * @param galaxyRoot  The root directory of Galaxy.
@@ -190,7 +209,7 @@ public class GalaxyProperties {
     return getConfigPathFromRoot(galaxyRoot, "shed_tool_conf.xml");
   }
 
-
+  
   public void configureGalaxy(final File galaxyRoot) {
     try {
       if(configureNestedShedTools) {
@@ -242,6 +261,22 @@ public class GalaxyProperties {
   
   public String getGalaxyURL() {
     return galaxyURL;
+  }
+
+  //http://www.coderanch.com/t/279002/java-io/java/find-executable-path
+  private Optional<File> which(final String executableName) {
+    String systemPath = System.getenv("PATH");
+    String[] pathDirs = systemPath.split(File.pathSeparator);
+    
+    Optional<File> fullyQualifiedExecutable = Optional.absent();
+    for(final String pathDir : pathDirs) {
+      File file = new File(pathDir, executableName);
+      if (file.isFile()) {
+        fullyQualifiedExecutable = Optional.of(file);
+        break;
+      }
+    }
+    return fullyQualifiedExecutable;
   }
 
 }

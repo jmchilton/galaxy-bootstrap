@@ -122,6 +122,7 @@ public class BootStrapperTest {
     assert shedToolsContents.equals(expectedShedToolsContents);
     assert new File(bootStrapper.getRoot(), "shed_tools").isDirectory();
     assert daemon.waitForUp();
+    assert !IoUtils.available(port);
     daemon.stop();
     assert daemon.waitForDown();    
   }
