@@ -5,4 +5,8 @@ jdk:
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq mercurial libsqlite3-dev python-dev
+after_failure:
+ - echo "Tests failed, dumping all logs."
+ - cat /tmp/**/bootstrap-log/*
+
 script: travis_wait mvn test -B

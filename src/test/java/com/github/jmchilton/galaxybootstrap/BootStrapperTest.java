@@ -78,6 +78,20 @@ public class BootStrapperTest {
   }
   
   /**
+   * Tests to make sure downloading Galaxy from github master branch works.
+   * @throws IOException 
+   * @throws InterruptedException 
+   */
+  @Test
+  public void testGithubMasterBranch() throws InterruptedException, IOException {
+    final BootStrapper bootStrapper = new BootStrapper(DownloadProperties.wgetGithubMaster());
+
+    testSetupGalaxyFor(bootStrapper);
+
+    bootStrapper.deleteGalaxyRoot();
+  }
+  
+  /**
    * Tests Galaxy for a specific setup.
    * @param bootStrapper  The BootStrapper used for setting up Galaxy.
    * @throws InterruptedException
@@ -108,6 +122,7 @@ public class BootStrapperTest {
     assert shedToolsContents.equals(expectedShedToolsContents);
     assert new File(bootStrapper.getRoot(), "shed_tools").isDirectory();
     assert daemon.waitForUp();
+    assert !IoUtils.available(port);
     daemon.stop();
     assert daemon.waitForDown();    
   }

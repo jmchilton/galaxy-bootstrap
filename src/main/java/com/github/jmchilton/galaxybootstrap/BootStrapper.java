@@ -1,5 +1,7 @@
 package com.github.jmchilton.galaxybootstrap;
 
+import com.google.common.base.Optional;
+
 import java.io.File;
 
 import org.slf4j.Logger;
@@ -83,7 +85,11 @@ public class BootStrapper {
     
     logger.info("Starting setup of Galaxy, logDir=" + bootstrapLogDir);
     galaxyProperties.configureGalaxy(getRoot());
-    
+
+    if(galaxyProperties.shouldConfigureVirtualenv()) {
+      executeGalaxyScript("virtualenv .venv");
+    }
+
     if (!galaxyProperties.isPre20141006Release(getRoot())) {
       executeGalaxyScript("sh scripts/common_startup.sh 1> " 
           + buildLogPath(bootstrapLogDir,"common_startup.log") + " 2>&1");
@@ -218,7 +224,7 @@ public class BootStrapper {
   
   
   /**
-   * Setup the definied instance of Galaxy.
+   * Setup the defined instance of Galaxy.
    */
   public void setupGalaxy() {
     downloadProperties.download();
@@ -229,8 +235,9 @@ public class BootStrapper {
    * @param scriptName  The Galaxy script to run.
    */
   private void executeGalaxyScript(final String scriptName) {
-    final String bashScript = String.format("cd %s; %s", getPath(), scriptName);
+    final String bashScript = String.format("cd %s; if [ -f .venv ]; then . .venv/bin/activate; fi; %s", getPath(), scriptName);
     IoUtils.executeAndWait("bash", "-c", bashScript);
   }
+
   
 }

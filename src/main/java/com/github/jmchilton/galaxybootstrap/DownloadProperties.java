@@ -21,8 +21,9 @@ public class DownloadProperties {
 	
   private static final Logger logger = LoggerFactory
   		.getLogger(DownloadProperties.class);
-	
-  public static final String GITHUB_MASTER_URL = "https://codeload.github.com/jmchilton/galaxy-central/zip/master";
+
+  public static final String GITHUB_BASE_URL = "https://codeload.github.com/galaxyproject/galaxy/zip/";
+  public static final String GITHUB_MASTER_URL = GITHUB_BASE_URL+ "master";
   public static final String GALAXY_DIST_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-dist";
   public static final String GALAXY_CENTRAL_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-central";
   public static final String BRANCH_STABLE = "stable";
@@ -120,9 +121,26 @@ public class DownloadProperties {
   }
 
   /**
+   * Builds a new DownloadProperties for downloading Galaxy from github master branch (stable) using wget.
+   * @return  A DownloadProperties for downloading Galaxy from github using wget.
+   */
+  public static DownloadProperties wgetGithubMaster() {
+    return wgetGithubMaster(null);
+  }
+  
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from github dev branch using wget.
+   * @return  A DownloadProperties for downloading Galaxy from github using wget.
+   */
+  public static DownloadProperties wgetGithubDev() {
+    return wgetGithubDev(null);
+  }
+  
+  /**
    * Builds a new DownloadProperties for downloading Galaxy from github using wget.
    * @return  A DownloadProperties for downloading Galaxy from github using wget.
    */
+  @Deprecated
   public static DownloadProperties wgetGithubCentral() {
     return wgetGithubCentral(null);
   }
@@ -184,10 +202,43 @@ public class DownloadProperties {
    *  should be chosen by default.
    * @return  A DownloadProperties for downloading Galaxy from github using wget.
    */
+  @Deprecated
   public static DownloadProperties wgetGithubCentral(final File destination) {
     return new DownloadProperties(new GithubDownloader(), destination);
   }
   
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from github using wget.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return  A DownloadProperties for downloading Galaxy from github using wget.
+   */
+  public static DownloadProperties wgetGithubMaster(final File destination) {
+    return DownloadProperties.wgetGithub("master", destination);
+  }
+  
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from github using wget.
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return  A DownloadProperties for downloading Galaxy from github using wget.
+   */
+  public static DownloadProperties wgetGithubDev(final File destination) {
+    return DownloadProperties.wgetGithub("dev", destination);
+  }
+
+  /**
+   * Builds a new DownloadProperties for downloading Galaxy from github using wget.
+   * @param branch The branch to download (e.g. master, dev, release_15.03).
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return  A DownloadProperties for downloading Galaxy from github using wget.
+   */
+  public static DownloadProperties wgetGithub(final String branch, final File destination) {
+    return new DownloadProperties(new GithubDownloader(branch), destination);
+  }
+  
+
   /**
    * Builds a new DownloadProperties for downloading Galaxy from galaxy-dist.
    * @param destination The destination directory to store Galaxy, null if a directory
@@ -354,13 +405,22 @@ public class DownloadProperties {
    * Defines a downloader to download Galaxy from github.
    */
   private static class GithubDownloader implements Downloader {
-
+    private final String branch;
+    
+    GithubDownloader() {
+      this("master");
+    }
+    
+    GithubDownloader(final String branch) {
+      this.branch = branch;
+    }
+    
     public void downloadTo(File path, boolean useCache) {
       try {
         final File downloadDest = File.createTempFile("gxdownload", ".zip");
         final File unzipDest = File.createTempFile("gxdownload", "dir");
-        final String unzippedDirectory = String.format("%s/galaxy-central-master", unzipDest.getAbsolutePath());
-        IoUtils.executeAndWait("wget", GITHUB_MASTER_URL, "-O", downloadDest.getAbsolutePath());
+        final String unzippedDirectory = String.format("%s/galaxy-%s", unzipDest.getAbsolutePath(), this.branch);
+        IoUtils.executeAndWait("wget", GITHUB_BASE_URL + this.branch, "-O", downloadDest.getAbsolutePath());
         unzipDest.delete();
         IoUtils.executeAndWait("unzip", "-o", "-qq", downloadDest.getAbsolutePath(), "-d", unzipDest.getAbsolutePath());
         path.delete();
@@ -373,7 +433,7 @@ public class DownloadProperties {
     
     @Override
     public String toString() {
-      return "GithubDownloader [url=" + GITHUB_MASTER_URL + ", branch=master]";
+      return "GithubDownloader [url=" + GITHUB_BASE_URL + this.branch + ", branch=" + this.branch + "]";
     }
   }
 
