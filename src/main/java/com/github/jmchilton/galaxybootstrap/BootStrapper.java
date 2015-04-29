@@ -235,7 +235,7 @@ public class BootStrapper {
    * @param scriptName  The Galaxy script to run.
    */
   private void executeGalaxyScript(final String scriptName) {
-    final String bashScript = String.format("cd %s; if [ -f .venv ]; then . .venv/bin/activate; fi; %s", getPath(), scriptName);
+    final String bashScript = String.format("cd %s; if [ -d .venv ]; then . .venv/bin/activate; fi; %s", getPath(), scriptName);
     IoUtils.executeAndWait("bash", "-c", bashScript);
   }
 
