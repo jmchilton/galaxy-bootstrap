@@ -4,7 +4,7 @@ jdk:
   - openjdk6
 before_install:
  - sudo apt-get update -qq
- - sudo apt-get install -qq mercurial libsqlite3-dev python-dev
+ - sudo apt-get install -qq mercurial libsqlite3-dev python-dev python-virtualenv
 after_failure:
  - echo "Tests failed, dumping all logs."
  - cat /tmp/**/bootstrap-log/*
