@@ -63,8 +63,7 @@ public class BootStrapperTest {
    */
   @Test
   public void testSpecificRevision() throws InterruptedException, IOException {
-    // Galaxy stable release for 2013.11.04 at https://bitbucket.org/galaxy/galaxy-dist
-    final String expectedRevision = "5e605ed6069fe4c5ca9875e95e91b2713499e8ca";
+    final String expectedRevision = "0079d3c5a85d4f5316a41628a2669c442ead02c4";
     final BootStrapper bootStrapper = new BootStrapper(
       DownloadProperties.forStableAtRevision(expectedRevision));
     
