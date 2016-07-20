@@ -95,10 +95,6 @@ public class BootStrapper {
           + buildLogPath(bootstrapLogDir,"common_startup.log") + " 2>&1");
     }
 
-    executeGalaxyScript("python scripts/fetch_eggs.py 1> "
-      + buildLogPath(bootstrapLogDir,"fetch_eggs.log") + " 2>&1");
-
- 
     if(galaxyProperties.isCreateDatabaseRequired()) {
       executeGalaxyScript("sh create_db.sh 1> " 
         + buildLogPath(bootstrapLogDir,"create_db.log") + " 2>&1");
