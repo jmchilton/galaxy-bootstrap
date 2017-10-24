@@ -12,7 +12,6 @@ import com.google.common.io.Resources;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
@@ -244,7 +243,8 @@ public class GalaxyProperties {
       final File sqliteDatabase = new File(databaseDirectory, "universe.sqlite");
       if(this.database.isPresent()) {
         final URL database = this.database.get();
-        Files.copy(Resources.newInputStreamSupplier(database), sqliteDatabase);
+        Resources.asByteSource(database).copyTo(Files.asByteSink(sqliteDatabase));
+        //Files.copy(Resources.newInputStreamSupplier(database), sqliteDatabase);
       }
     } catch(final IOException ioException) {
       throw new RuntimeException(ioException);
