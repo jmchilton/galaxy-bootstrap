@@ -1,7 +1,5 @@
-package com.github.jmchilton.galaxybootstrap;
+package com.github.dfornika.galaxybootstrap;
 
-import com.github.jmchilton.galaxybootstrap.BootStrapper.GalaxyDaemon;
-import com.github.jmchilton.galaxybootstrap.GalaxyData.User;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -16,63 +14,63 @@ import org.testng.annotations.Test;
 public class BootStrapperTest {
 
   /**
-   * Tests deafult BootStrapper is the latest stable.
+   * Tests default BootStrapper is the latest stable.
    * @throws InterruptedException
    * @throws IOException
    */
   @Test
   public void testSetup() throws InterruptedException, IOException {
     final BootStrapper bootStrapper = new BootStrapper();
-    
+
     bootStrapper.setupGalaxy();
     
-    // test to make sure we have checked out the latest revision of Galaxy
-    String expectedLatestRevision = getTipMercurialRevisionHash(bootStrapper.getPath());
-    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
-    assert expectedLatestRevision != null;
-    assert expectedLatestRevision.equalsIgnoreCase(actualRevision);
+    // test to make sure we have checked out the latest commit of Galaxy
+    String expectedLatestCommit = getTipGitCommitHash(bootStrapper.getPath());
+    String actualCommit = getCurrentGitCommitHash(bootStrapper.getPath());
+    assert expectedLatestCommit != null;
+    assert expectedLatestCommit.equalsIgnoreCase(actualCommit);
     
     bootStrapper.deleteGalaxyRoot();
   }
   
   /**
-   * Tests setup of Galaxy for the latest stable.
+   * Tests setup of Galaxy for the latest release.
    * @throws IOException 
    * @throws InterruptedException 
    */
   @Test
-  public void testLatestStable() throws InterruptedException, IOException {
+  public void testLatestRelease() throws InterruptedException, IOException {
     final BootStrapper bootStrapper = new BootStrapper(
-      DownloadProperties.forLatestStable());
+      DownloadProperties.forLatestRelease());
 
     testSetupGalaxyFor(bootStrapper);
     
-    // test to make sure we have checked out the latest revision of Galaxy
-    String expectedLatestRevision = getTipMercurialRevisionHash(bootStrapper.getPath());
-    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
-    assert expectedLatestRevision != null;
-    assert expectedLatestRevision.equalsIgnoreCase(actualRevision);
+    // test to make sure we have checked out the latest commit of Galaxy
+    String expectedLatestCommit = getTipGitCommitHash(bootStrapper.getPath());
+    String actualCommit = getCurrentGitCommitHash(bootStrapper.getPath());
+    assert expectedLatestCommit != null;
+    assert expectedLatestCommit.equalsIgnoreCase(actualCommit);
     
     bootStrapper.deleteGalaxyRoot();
   }
   
   /**
-   * Tests to make sure downloading Galaxy at a specific revision works
+   * Tests to make sure downloading Galaxy at a specific commit works
    * @throws IOException 
    * @throws InterruptedException 
    */
   @Test
-  public void testSpecificRevision() throws InterruptedException, IOException {
-    // Galaxy stable release for 2013.11.04 at https://bitbucket.org/galaxy/galaxy-dist
-    final String expectedRevision = "5e605ed6069fe4c5ca9875e95e91b2713499e8ca";
+  public void testSpecificCommit() throws InterruptedException, IOException {
+    // release_17.05 on 2017-10-19 at https://github.com/galaxyproject/galaxy
+    final String expectedCommit = "f0e9767912f91932d3541a3e824ebe026648cbf6";
     final BootStrapper bootStrapper = new BootStrapper(
-      DownloadProperties.forStableAtRevision(expectedRevision));
+      DownloadProperties.forLatestReleaseAtCommit(expectedCommit));
     
     testSetupGalaxyFor(bootStrapper);
     
-    String actualRevision = getCurrentMercurialRevisionHash(bootStrapper.getPath());
-    
-    assert expectedRevision.equalsIgnoreCase(actualRevision);
+    String actualCommit = getCurrentGitCommitHash(bootStrapper.getPath());
+
+    assert expectedCommit.equalsIgnoreCase(actualCommit);
     
     bootStrapper.deleteGalaxyRoot();
   }
@@ -84,7 +82,7 @@ public class BootStrapperTest {
    */
   @Test
   public void testGithubMasterBranch() throws InterruptedException, IOException {
-    final BootStrapper bootStrapper = new BootStrapper(DownloadProperties.wgetGithubMaster());
+    final BootStrapper bootStrapper = new BootStrapper(DownloadProperties.gitGithubMaster());
 
     testSetupGalaxyFor(bootStrapper);
 
@@ -105,8 +103,8 @@ public class BootStrapperTest {
             .assignFreePort()
             .configureNestedShedTools();
     final GalaxyData galaxyData = new GalaxyData();
-    final User adminUser = new User("admin@localhost");
-    final User normalUser = new User("user@localhost");
+    final GalaxyData.User adminUser = new GalaxyData.User("admin@localhost");
+    final GalaxyData.User normalUser = new GalaxyData.User("user@localhost");
     galaxyData.getUsers().add(adminUser);
     galaxyData.getUsers().add(normalUser);
     galaxyProperties.setAdminUser("admin@localhost");
@@ -114,7 +112,7 @@ public class BootStrapperTest {
     galaxyProperties.prepopulateSqliteDatabase();
     final int port = galaxyProperties.getPort();
     assert IoUtils.available(port);
-    final GalaxyDaemon daemon = bootStrapper.run(galaxyProperties, galaxyData);
+    final BootStrapper.GalaxyDaemon daemon = bootStrapper.run(galaxyProperties, galaxyData);
     final File shedToolsFile = new File(bootStrapper.getRoot(), "shed_tool_conf.xml");    
     final String shedToolsContents = Files.toString(shedToolsFile, Charsets.UTF_8);
     final URL shedToolConfResource = getClass().getResource("shed_tool_conf.xml");
@@ -126,36 +124,38 @@ public class BootStrapperTest {
     daemon.stop();
     assert daemon.waitForDown();    
   }
-  
+
   /**
-   * Given the mercurial root directory gets the current revision hash code checked out.
-   * @param mercurialDir  The root mercurial directory.
-   * @return  The current revision hash checked out.
+   * Given the git root directory gets the current commit hash code checked out.
+   * @param gitDir  The root git directory.
+   * @return  The current commit hash checked out.
    */
-  private String getCurrentMercurialRevisionHash(String mercurialDir) {
+  private String getCurrentGitCommitHash(String gitDir) {
     String hash = null;
-    final String bashScript 
-      = "cd " + mercurialDir + "; hg parent --template '{node}'";
+    final String bashScript
+            = "cd " + gitDir + "; git rev-parse HEAD";
     Process p = IoUtils.execute("bash", "-c", bashScript);
-    
+
     hash = convertStreamToString(p.getInputStream());
-    
+    hash = hash.replace("\n", "");
+
     return hash;
   }
-  
+
   /**
-   * Given the mercurial root directory gets the tip revision hash code.
-   * @param mercurialDir  The root mercurial directory.
-   * @return  The tip revision hash.
+   * Given the git root directory gets the tip commit hash code.
+   * @param gitDir  The root git directory.
+   * @return  The tip commit hash.
    */
-  private String getTipMercurialRevisionHash(String mercurialDir) {
+  private String getTipGitCommitHash(String gitDir) {
     String hash = null;
-    final String bashScript 
-      = "cd " + mercurialDir + "; hg tip --template '{node}'";
+    final String bashScript
+            = "cd " + gitDir + "; git rev-parse $(git rev-parse --abbrev-ref HEAD)";
     Process p = IoUtils.execute("bash", "-c", bashScript);
-    
+
     hash = convertStreamToString(p.getInputStream());
-    
+    hash = hash.replace("\n", "");
+
     return hash;
   }
   

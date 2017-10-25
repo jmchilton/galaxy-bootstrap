@@ -1,5 +1,5 @@
 
-package com.github.jmchilton.galaxybootstrap;
+package com.github.dfornika.galaxybootstrap;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -213,6 +213,8 @@ public class GalaxyProperties {
     try {
       if(configureNestedShedTools) {
         final File shedConf = new File(galaxyRoot, "shed_tool_conf.xml");
+        // final InputSupplier<InputStream> shedToolConfSupplier =  Resources.newInputStreamSupplier(getClass().getResource("shed_tool_conf.xml"));
+        // Files.copy(shedToolConfSupplier, shedConf);
         final ByteSource shedToolByteSource = Resources.asByteSource(getClass().getResource("shed_tool_conf.xml"));
         shedToolByteSource.copyTo(Files.asByteSink(shedConf));
         new File(galaxyRoot, "shed_tools").mkdirs();
@@ -244,7 +246,7 @@ public class GalaxyProperties {
       if(this.database.isPresent()) {
         final URL database = this.database.get();
         Resources.asByteSource(database).copyTo(Files.asByteSink(sqliteDatabase));
-        //Files.copy(Resources.newInputStreamSupplier(database), sqliteDatabase);
+        // Files.copy(Resources.newInputStreamSupplier(database), sqliteDatabase);
       }
     } catch(final IOException ioException) {
       throw new RuntimeException(ioException);

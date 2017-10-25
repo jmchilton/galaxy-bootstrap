@@ -1,6 +1,4 @@
-package com.github.jmchilton.galaxybootstrap;
-
-import com.google.common.base.Optional;
+package com.github.dfornika.galaxybootstrap;
 
 import java.io.File;
 

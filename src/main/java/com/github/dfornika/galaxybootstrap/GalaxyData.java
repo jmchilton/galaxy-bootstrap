@@ -1,5 +1,5 @@
 
-package com.github.jmchilton.galaxybootstrap;
+package com.github.dfornika.galaxybootstrap;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
