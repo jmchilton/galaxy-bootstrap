@@ -1,4 +1,4 @@
-package com.github.dfornika.galaxybootstrap;
+package com.github.jmchilton.galaxybootstrap;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package com.github.dfornika.galaxybootstrap;
+package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.hash.Hashing;
 

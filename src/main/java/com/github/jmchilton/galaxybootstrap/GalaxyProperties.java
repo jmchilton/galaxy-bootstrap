@@ -1,5 +1,5 @@
 
-package com.github.dfornika.galaxybootstrap;
+package com.github.jmchilton.galaxybootstrap;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
