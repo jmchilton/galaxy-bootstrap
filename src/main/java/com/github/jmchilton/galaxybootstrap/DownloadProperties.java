@@ -154,6 +154,7 @@ public class DownloadProperties {
   public static DownloadProperties wgetGithubDev() {
     return wgetGithubDev(null);
   }
+
   /**
    * Builds a new DownloadProperties for downloading Galaxy from github using wget.
    * @return  A DownloadProperties for downloading Galaxy from github using wget.
@@ -162,6 +163,7 @@ public class DownloadProperties {
   public static DownloadProperties wgetGithubCentral() {
     return wgetGithubCentral(null);
   }
+
   /**
    * Builds a new DownloadProperties for downloading Galaxy from galaxy-dist.
    * @return A new DownloadProperties for downloading Galaxy from galaxy-dist.
@@ -179,6 +181,7 @@ public class DownloadProperties {
   public static DownloadProperties forGalaxyDistAtRevision(String revision) {
     return forGalaxyDist(null, revision);
   }
+
   /**
    * Builds a new DownloadProperties for downloading Galaxy from galaxy-central.
    * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
@@ -262,6 +265,7 @@ public class DownloadProperties {
   public static DownloadProperties gitGithubMaster(final File destination) {
     return DownloadProperties.gitGithub("master", destination);
   }
+
   /**
    * Builds a new DownloadProperties for downloading Galaxy from github using wget.
    * @param destination The destination directory to store Galaxy, null if a directory
@@ -638,7 +642,7 @@ public class DownloadProperties {
         throw new RuntimeException(ex);
       }
     }
-    
+
     @Override
     public String toString() {
       return "JavaGithubDownloader [url=" + GITHUB_ZIP_MASTER_URL + ", branch=master]";
