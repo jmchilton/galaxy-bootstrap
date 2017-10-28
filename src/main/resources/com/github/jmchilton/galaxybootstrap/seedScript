@@ -11,7 +11,7 @@ security_agent.sa_session = sa_session
 def add_user(email, password, key=None):
     query = sa_session.query( User ).filter_by( email=email )
     if query.count() > 0:
-      return query.first()
+        return query.first()
     else:
         user = User(email)
         user.set_password_cleartext(password)
