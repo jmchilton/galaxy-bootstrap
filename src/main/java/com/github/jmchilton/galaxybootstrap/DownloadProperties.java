@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +140,6 @@ public class DownloadProperties {
   public static DownloadProperties wgetGithubMaster() {
     return wgetGithubMaster(null);
   }
-
   /**
    * Builds a new DownloadProperties for downloading Galaxy from github master branch (stable) using wget.
    * @return  A DownloadProperties for downloading Galaxy from github using wget.
@@ -149,7 +147,6 @@ public class DownloadProperties {
   public static DownloadProperties gitGithubMaster() {
     return gitGithubMaster(null);
   }
-  
   /**
    * Builds a new DownloadProperties for downloading Galaxy from github dev branch using wget.
    * @return  A DownloadProperties for downloading Galaxy from github using wget.
@@ -157,7 +154,6 @@ public class DownloadProperties {
   public static DownloadProperties wgetGithubDev() {
     return wgetGithubDev(null);
   }
-
   /**
    * Builds a new DownloadProperties for downloading Galaxy from github using wget.
    * @return  A DownloadProperties for downloading Galaxy from github using wget.
@@ -166,7 +162,6 @@ public class DownloadProperties {
   public static DownloadProperties wgetGithubCentral() {
     return wgetGithubCentral(null);
   }
-
   /**
    * Builds a new DownloadProperties for downloading Galaxy from galaxy-dist.
    * @return A new DownloadProperties for downloading Galaxy from galaxy-dist.
@@ -184,7 +179,6 @@ public class DownloadProperties {
   public static DownloadProperties forGalaxyDistAtRevision(String revision) {
     return forGalaxyDist(null, revision);
   }
-
   /**
    * Builds a new DownloadProperties for downloading Galaxy from galaxy-central.
    * @return A new DownloadProperties for downloading Galaxy from galaxy-central.
@@ -229,7 +223,6 @@ public class DownloadProperties {
   public static DownloadProperties forLatestRelease() {
     return forLatestRelease(null);
   }
-  
   /**
    * Builds a new DownloadProperties for downloading the latest stable Galaxy with a specific commit.
    * @param commit The commit to use for Galaxy.
@@ -269,7 +262,6 @@ public class DownloadProperties {
   public static DownloadProperties gitGithubMaster(final File destination) {
     return DownloadProperties.gitGithub("master", destination);
   }
-
   /**
    * Builds a new DownloadProperties for downloading Galaxy from github using wget.
    * @param destination The destination directory to store Galaxy, null if a directory
@@ -618,7 +610,6 @@ public class DownloadProperties {
         ZipEntry ze = zis.getNextEntry();
         byte[] buffer = new byte[1024];
         while(ze!=null){
-
           String fileName = ze.getName().substring("galaxy-central-master/".length());
           if(fileName.equals("")) {
             continue;
@@ -633,7 +624,7 @@ public class DownloadProperties {
 
           int len;
           while ((len = zis.read(buffer)) > 0) {
-            fos.write(buffer, 0, len);
+                     fos.write(buffer, 0, len);
           }
 
           fos.close();
@@ -647,7 +638,7 @@ public class DownloadProperties {
         throw new RuntimeException(ex);
       }
     }
-
+    
     @Override
     public String toString() {
       return "JavaGithubDownloader [url=" + GITHUB_ZIP_MASTER_URL + ", branch=master]";
