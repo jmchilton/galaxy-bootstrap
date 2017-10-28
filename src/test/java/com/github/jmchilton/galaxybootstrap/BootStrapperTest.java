@@ -160,7 +160,40 @@ public class BootStrapperTest {
 
     return hash;
   }
-  
+
+  /**
+   * Given the mercurial root directory gets the current revision hash code checked out.
+   * @param mercurialDir  The root mercurial directory.
+   * @return  The current revision hash checked out.
+   */
+  @Deprecated
+  private String getCurrentMercurialRevisionHash(String mercurialDir) {
+    String hash = null;
+    final String bashScript
+            = "cd " + mercurialDir + "; hg parent --template '{node}'";
+    Process p = IoUtils.execute("bash", "-c", bashScript);
+
+    hash = convertStreamToString(p.getInputStream());
+
+    return hash;
+  }
+  @Deprecated
+  /**
+   * Given the mercurial root directory gets the tip revision hash code.
+   * @param mercurialDir  The root mercurial directory.
+   * @return  The tip revision hash.
+   */
+  private String getTipMercurialRevisionHash(String mercurialDir) {
+    String hash = null;
+    final String bashScript
+            = "cd " + mercurialDir + "; hg tip --template '{node}'";
+    Process p = IoUtils.execute("bash", "-c", bashScript);
+
+    hash = convertStreamToString(p.getInputStream());
+
+    return hash;
+  }
+
   /**
    * Given an input stream, converts to a String containing all data.
    * @param is  The input stream to read from.
