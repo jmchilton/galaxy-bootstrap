@@ -64,6 +64,7 @@
       <version>1.7.7</version>
       <scope>test</scope>
     </dependency>
+  </dependencies>
   <reporting>
     <plugins>
       <plugin>
