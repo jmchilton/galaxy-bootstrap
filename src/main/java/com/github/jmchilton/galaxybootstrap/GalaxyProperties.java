@@ -213,8 +213,6 @@ public class GalaxyProperties {
     try {
       if(configureNestedShedTools) {
         final File shedConf = new File(galaxyRoot, "shed_tool_conf.xml");
-        // final InputSupplier<InputStream> shedToolConfSupplier =  Resources.newInputStreamSupplier(getClass().getResource("shed_tool_conf.xml"));
-        // Files.copy(shedToolConfSupplier, shedConf);
         final ByteSource shedToolByteSource = Resources.asByteSource(getClass().getResource("shed_tool_conf.xml"));
         shedToolByteSource.copyTo(Files.asByteSink(shedConf));
         new File(galaxyRoot, "shed_tools").mkdirs();
