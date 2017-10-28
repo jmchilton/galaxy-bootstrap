@@ -244,7 +244,6 @@ public class GalaxyProperties {
       if(this.database.isPresent()) {
         final URL database = this.database.get();
         Resources.asByteSource(database).copyTo(Files.asByteSink(sqliteDatabase));
-        // Files.copy(Resources.newInputStreamSupplier(database), sqliteDatabase);
       }
     } catch(final IOException ioException) {
       throw new RuntimeException(ioException);
