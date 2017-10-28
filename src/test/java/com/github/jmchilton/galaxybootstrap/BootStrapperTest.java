@@ -1,5 +1,7 @@
 package com.github.jmchilton.galaxybootstrap;
 
+import com.github.jmchilton.galaxybootstrap.BootStrapper.GalaxyDaemon;
+import com.github.jmchilton.galaxybootstrap.GalaxyData.User;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -103,8 +105,8 @@ public class BootStrapperTest {
             .assignFreePort()
             .configureNestedShedTools();
     final GalaxyData galaxyData = new GalaxyData();
-    final GalaxyData.User adminUser = new GalaxyData.User("admin@localhost");
-    final GalaxyData.User normalUser = new GalaxyData.User("user@localhost");
+    final User adminUser = new User("admin@localhost");
+    final User normalUser = new User("user@localhost");
     galaxyData.getUsers().add(adminUser);
     galaxyData.getUsers().add(normalUser);
     galaxyProperties.setAdminUser("admin@localhost");
@@ -112,7 +114,7 @@ public class BootStrapperTest {
     galaxyProperties.prepopulateSqliteDatabase();
     final int port = galaxyProperties.getPort();
     assert IoUtils.available(port);
-    final BootStrapper.GalaxyDaemon daemon = bootStrapper.run(galaxyProperties, galaxyData);
+    final GalaxyDaemon daemon = bootStrapper.run(galaxyProperties, galaxyData);
     final File shedToolsFile = new File(bootStrapper.getRoot(), "shed_tool_conf.xml");    
     final String shedToolsContents = Files.toString(shedToolsFile, Charsets.UTF_8);
     final URL shedToolConfResource = getClass().getResource("shed_tool_conf.xml");
