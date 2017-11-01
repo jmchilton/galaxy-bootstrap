@@ -32,10 +32,12 @@ public class DownloadProperties {
   public static final String BRANCH_MASTER= "master";
   public static final String BRANCH_RELEASE_17_01 = "release_17.01";
   public static final String BRANCH_RELEASE_17_05 = "release_17.05";
+  public static final String BRANCH_RELEASE_17_09 = "release_17.09";
   public static final String TAG_RELEASE_17_01 = "v17.01";
   public static final String TAG_RELEASE_17_05 = "v17.05";
-  public static final String BRANCH_RELEASE_LATEST = BRANCH_RELEASE_17_05;
-  public static final String TAG_RELEASE_LATEST = TAG_RELEASE_17_05;
+  public static final String TAG_RELEASE_17_09 = "v17.09";
+  public static final String BRANCH_RELEASE_LATEST = BRANCH_RELEASE_17_09;
+  public static final String TAG_RELEASE_LATEST = TAG_RELEASE_17_09;
 
   /**
    * Defines a constant for specifying that Galaxy should be downloaded with the latest commit.
