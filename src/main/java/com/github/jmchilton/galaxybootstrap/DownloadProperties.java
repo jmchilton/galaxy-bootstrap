@@ -542,7 +542,7 @@ public class DownloadProperties {
     
     @Override
     public String toString() {
-      return "GithubDownloader [url=" + GITHUB_ZIP_URL + this.branchOrTag + ", branch=" + this.branchOrTag + "]";
+      return "WgetGithubDownloader [url=" + GITHUB_ZIP_URL + this.branchOrTag + ", branch=" + this.branchOrTag + "]";
     }
   }
 
