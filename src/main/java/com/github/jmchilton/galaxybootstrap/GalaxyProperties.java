@@ -6,13 +6,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
@@ -214,8 +213,8 @@ public class GalaxyProperties {
     try {
       if(configureNestedShedTools) {
         final File shedConf = new File(galaxyRoot, "shed_tool_conf.xml");
-        final InputSupplier<InputStream> shedToolConfSupplier =  Resources.newInputStreamSupplier(getClass().getResource("shed_tool_conf.xml"));
-        Files.copy(shedToolConfSupplier, shedConf);
+        final ByteSource shedToolByteSource = Resources.asByteSource(getClass().getResource("shed_tool_conf.xml"));
+        shedToolByteSource.copyTo(Files.asByteSink(shedConf));
         new File(galaxyRoot, "shed_tools").mkdirs();
       }
 
@@ -244,7 +243,7 @@ public class GalaxyProperties {
       final File sqliteDatabase = new File(databaseDirectory, "universe.sqlite");
       if(this.database.isPresent()) {
         final URL database = this.database.get();
-        Files.copy(Resources.newInputStreamSupplier(database), sqliteDatabase);
+        Resources.asByteSource(database).copyTo(Files.asByteSink(sqliteDatabase));
       }
     } catch(final IOException ioException) {
       throw new RuntimeException(ioException);

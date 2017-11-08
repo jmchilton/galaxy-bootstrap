@@ -1,7 +1,5 @@
 package com.github.jmchilton.galaxybootstrap;
 
-import com.google.common.base.Optional;
-
 import java.io.File;
 
 import org.slf4j.Logger;
@@ -94,17 +92,15 @@ public class BootStrapper {
       executeGalaxyScript("sh scripts/common_startup.sh 1> " 
           + buildLogPath(bootstrapLogDir,"common_startup.log") + " 2>&1");
     }
-
-    executeGalaxyScript("python scripts/fetch_eggs.py 1> "
-      + buildLogPath(bootstrapLogDir,"fetch_eggs.log") + " 2>&1");
-
- 
+    
     if(galaxyProperties.isCreateDatabaseRequired()) {
       executeGalaxyScript("sh create_db.sh 1> " 
         + buildLogPath(bootstrapLogDir,"create_db.log") + " 2>&1");
     }
 
     if(galaxyData != null) {
+      executeGalaxyScript("sh manage_db.sh -c config/galaxy.ini upgrade 1> "
+        + buildLogPath(bootstrapLogDir,"upgrade_db.log") + " 2>&1");
       galaxyData.writeSeedScript(new File(getRoot(), "seed.py"));
       executeGalaxyScript("python seed.py 1> " 
         + buildLogPath(bootstrapLogDir,"seed.log") + " 2>&1");
