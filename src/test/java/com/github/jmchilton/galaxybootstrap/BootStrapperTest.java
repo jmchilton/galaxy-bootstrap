@@ -34,25 +34,21 @@ public class BootStrapperTest {
     
     bootStrapper.deleteGalaxyRoot();
   }
-  
+
+
   /**
    * Tests setup of Galaxy for the latest release.
-   * @throws IOException 
-   * @throws InterruptedException 
+   * @throws IOException
+   * @throws InterruptedException
    */
   @Test
-  public void testLatestRelease() throws InterruptedException, IOException {
+  public void testSpecificRelease() throws InterruptedException, IOException {
+    String release = "v17.01";
     final BootStrapper bootStrapper = new BootStrapper(
-      DownloadProperties.forLatestRelease());
+            DownloadProperties.forRelease(release));
 
     testSetupGalaxyFor(bootStrapper);
-    
-    // test to make sure we have checked out the latest commit of Galaxy
-    String expectedLatestCommit = getTipGitCommitHash(bootStrapper.getPath());
-    String actualCommit = getCurrentGitCommitHash(bootStrapper.getPath());
-    assert expectedLatestCommit != null;
-    assert expectedLatestCommit.equalsIgnoreCase(actualCommit);
-    
+
     bootStrapper.deleteGalaxyRoot();
   }
   
@@ -125,6 +121,23 @@ public class BootStrapperTest {
     assert !IoUtils.available(port);
     daemon.stop();
     assert daemon.waitForDown();    
+  }
+
+  /**
+   * Given the git root directory gets the current commit hash code checked out.
+   * @param gitDir  The root git directory.
+   * @return  The current commit hash checked out.
+   */
+  private String getCurrentGitBranchName(String gitDir) {
+    String branchName = null;
+    final String bashScript
+            = "cd " + gitDir + "; git rev-parse --abbrev-ref HEAD";
+    Process p = IoUtils.execute("bash", "-c", bashScript);
+
+    branchName = convertStreamToString(p.getInputStream());
+    branchName = branchName.replace("\n", "");
+
+    return branchName;
   }
 
   /**

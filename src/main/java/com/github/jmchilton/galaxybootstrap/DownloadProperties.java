@@ -22,7 +22,7 @@ public class DownloadProperties {
   private static final Logger logger = LoggerFactory
   		.getLogger(DownloadProperties.class);
 
-  public static final String GITHUB_ZIP_URL = "https://codeload.github.com/galaxyproject/galaxy/zip/";
+  public static final String GITHUB_ZIP_URL = "https://github.com/galaxyproject/galaxy/archive/";
   public static final String GITHUB_ZIP_MASTER_URL = GITHUB_ZIP_URL+ "master";
   public static final String GALAXY_GITHUB_REPOSITORY_URL = "https://github.com/galaxyproject/galaxy.git";
   public static final String GALAXY_DIST_REPOSITORY_URL = "https://bitbucket.org/galaxy/galaxy-dist";
@@ -32,10 +32,12 @@ public class DownloadProperties {
   public static final String BRANCH_MASTER= "master";
   public static final String BRANCH_RELEASE_17_01 = "release_17.01";
   public static final String BRANCH_RELEASE_17_05 = "release_17.05";
+  public static final String BRANCH_RELEASE_17_09 = "release_17.09";
   public static final String TAG_RELEASE_17_01 = "v17.01";
   public static final String TAG_RELEASE_17_05 = "v17.05";
-  public static final String BRANCH_RELEASE_LATEST = BRANCH_RELEASE_17_05;
-  public static final String TAG_RELEASE_LATEST = TAG_RELEASE_17_05;
+  public static final String TAG_RELEASE_17_09 = "v17.09";
+  public static final String BRANCH_RELEASE_LATEST = BRANCH_RELEASE_17_09;
+  public static final String TAG_RELEASE_LATEST = TAG_RELEASE_17_09;
 
   /**
    * Defines a constant for specifying that Galaxy should be downloaded with the latest commit.
@@ -78,7 +80,6 @@ public class DownloadProperties {
   @Deprecated
   public DownloadProperties(final String repositoryUrl, final File location) {
     this(new GitGithubDownloader(repositoryUrl, BRANCH_RELEASE_LATEST, LATEST_COMMIT), location);
-
   }
   
   /**
@@ -100,9 +101,7 @@ public class DownloadProperties {
    * @param location  The location to store Galaxy, null if a directory should be chosen automatically.
    */
   @Deprecated
-  public DownloadProperties(final String repositoryUrl, final String branch, final String commit,
-    final File location) {
-	  
+  public DownloadProperties(final String repositoryUrl, final String branch, final String commit, final File location) {
     this(new GitGithubDownloader(repositoryUrl, branch, commit), location);
   }
 
@@ -114,7 +113,6 @@ public class DownloadProperties {
   @Deprecated
   public DownloadProperties(final String repositoryUrl) {
     this(new GitGithubDownloader(repositoryUrl, BRANCH_RELEASE_LATEST, LATEST_COMMIT), null);
-
   }
 
   /**
@@ -220,19 +218,28 @@ public class DownloadProperties {
   }
 
   /**
-   * Builds a new DownloadProperties for downloading the latest stable Galaxy.
-   * @return A new DownloadProperties for downloading the latest stable Galaxy.
+   * Builds a new DownloadProperties for downloading the latest Galaxy release.
+   * @return A new DownloadProperties for downloading the latest Galaxy release.
    */
   public static DownloadProperties forLatestRelease() {
     return forLatestRelease(null);
   }
+
   /**
    * Builds a new DownloadProperties for downloading the latest stable Galaxy with a specific commit.
    * @param commit The commit to use for Galaxy.
    * @return A new DownloadProperties for downloading the latest stable Galaxy.
    */
-  public static DownloadProperties forLatestReleaseAtCommit(String commit) {
+  public static DownloadProperties forLatestReleaseAtCommit(final String commit) {
     return forLatestReleaseAtCommit(null, commit);
+  }
+
+  /**
+   * Builds a new DownloadProperties for downloading a specific Galaxy release branch.
+   * @return A new DownloadProperties for downloading the latest stable Galaxy.
+   */
+  public static DownloadProperties forRelease(final String release) {
+    return forRelease(release, null);
   }
 
   /**
@@ -367,13 +374,13 @@ public class DownloadProperties {
   }
 
   /**
-   * Builds a new DownloadProperties for downloading the latest stable Galaxy.
+   * Builds a new DownloadProperties for downloading the latest Galaxy release.
    * @param destination The destination directory to store Galaxy, null if a directory
    *  should be chosen by default.
-   * @return A new DownloadProperties for downloading the latest stable Galaxy.
+   * @return A new DownloadProperties for downloading the latest Galaxy release.
    */
   public static DownloadProperties forLatestRelease(final File destination) {
-    return new DownloadProperties(GALAXY_GITHUB_REPOSITORY_URL, BRANCH_RELEASE_LATEST, destination);
+    return new DownloadProperties(new WgetGithubDownloader(TAG_RELEASE_LATEST), destination);
   }
   
   /**
@@ -383,7 +390,18 @@ public class DownloadProperties {
    * @return A new DownloadProperties for downloading Galaxy at the given commit.
    */
   public static DownloadProperties forLatestReleaseAtCommit(final File destination, String commit) {
-    return new DownloadProperties(GALAXY_GITHUB_REPOSITORY_URL, BRANCH_RELEASE_LATEST, commit, destination);
+    return new DownloadProperties(new GitGithubDownloader(GALAXY_GITHUB_REPOSITORY_URL, BRANCH_RELEASE_LATEST, commit), destination);
+  }
+
+  /**
+   * Builds a new DownloadProperties for downloading a specific Galaxy release.
+   * @param release The release to pull from GitHub  (eg. "v17.01")
+   * @param destination The destination directory to store Galaxy, null if a directory
+   *  should be chosen by default.
+   * @return A new DownloadProperties for downloading a specific Galaxy release.
+   */
+  public static DownloadProperties forRelease(final String release, final File destination) {
+    return new DownloadProperties(new WgetGithubDownloader(release), destination);
   }
   
   /**
@@ -491,22 +509,27 @@ public class DownloadProperties {
    * Defines a downloader to download Galaxy from GitHub with wget.
    */
   private static class WgetGithubDownloader implements Downloader {
-    private final String branch;
+    private final String branchOrTag;
     
     WgetGithubDownloader() {
       this("master");
     }
     
-    WgetGithubDownloader(final String branch) {
-      this.branch = branch;
+    WgetGithubDownloader(final String branchOrTag) {
+      this.branchOrTag = branchOrTag;
     }
     
     public void downloadTo(File path, boolean useCache) {
       try {
         final File downloadDest = File.createTempFile("gxdownload", ".zip");
         final File unzipDest = File.createTempFile("gxdownload", "dir");
-        final String unzippedDirectory = String.format("%s/galaxy-%s", unzipDest.getAbsolutePath(), this.branch);
-        IoUtils.executeAndWait("wget", GITHUB_ZIP_URL + this.branch, "-O", downloadDest.getAbsolutePath());
+        String unzippedDirectory;
+        if (branchOrTag.matches("v\\d{2}\\.\\d{2}")) { // Release tags start with 'v' eg. "v17.01" but the downloaded zips are named eg. "galaxy-17.01.zip"
+          unzippedDirectory = String.format("%s/galaxy-%s", unzipDest.getAbsolutePath(), this.branchOrTag.substring(1));
+        } else {
+          unzippedDirectory = String.format("%s/galaxy-%s", unzipDest.getAbsolutePath(), this.branchOrTag);
+        }
+        IoUtils.executeAndWait("wget", GITHUB_ZIP_URL + this.branchOrTag + ".zip", "-O", downloadDest.getAbsolutePath());
         unzipDest.delete();
         IoUtils.executeAndWait("unzip", "-o", "-qq", downloadDest.getAbsolutePath(), "-d", unzipDest.getAbsolutePath());
         path.delete();
@@ -519,7 +542,7 @@ public class DownloadProperties {
     
     @Override
     public String toString() {
-      return "GithubDownloader [url=" + GITHUB_ZIP_URL + this.branch + ", branch=" + this.branch + "]";
+      return "WgetGithubDownloader [url=" + GITHUB_ZIP_URL + this.branchOrTag + ".zip" + ", branchOrTag=" + this.branchOrTag + "]";
     }
   }
 
