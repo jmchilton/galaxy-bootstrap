@@ -1,5 +1,9 @@
 # galaxy-bootstrap changelog
 
+## 0.7.0
+
+ - Updates to using github version of Galaxy by default. Thanks to Dan Fornika - https://github.com/apetkau/galaxy-bootstrap/pull/1
+
 ## 0.6.0
 
  - Use a virtualenv for Galaxy if available on the system.
